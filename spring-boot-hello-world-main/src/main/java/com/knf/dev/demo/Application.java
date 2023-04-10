@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
 
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(title = "Demo Api",
-	version = "v1",
-	description = "These are APIs for Demo"),
-	servers = @Server(url = "/"))
+
 public class Application {
 
 	public static void main(String[] args) {
