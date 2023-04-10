@@ -17,4 +17,9 @@ public class HelloController {
     	return "Hi All";
     }
     
+    @GetMapping("/callName")
+    public String callName() {
+    	return "Naga Sreeram";
+    }
+    
 }
