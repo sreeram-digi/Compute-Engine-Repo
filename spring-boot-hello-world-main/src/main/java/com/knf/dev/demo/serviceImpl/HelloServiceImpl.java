@@ -48,4 +48,12 @@ public class HelloServiceImpl implements HelloService {
 		return new ResponseEntity(hello,HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<String> save(Hello hello) {
+		// TODO Auto-generated method stub
+		
+helloRepository.save(hello);
+		return new ResponseEntity(hello,HttpStatus.OK);
+	}
+
 }

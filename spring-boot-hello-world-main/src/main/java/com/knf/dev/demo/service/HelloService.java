@@ -14,4 +14,6 @@ public interface HelloService {
 
 	ResponseEntity<String> findByName(String name);
 
+	ResponseEntity<String> save(Hello hello);
+
 }
