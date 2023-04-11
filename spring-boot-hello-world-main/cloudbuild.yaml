@@ -1,0 +1,52 @@
+steps:
+  # Compiling code
+  - name: maven:3.8.3-openjdk-11
+    id: compile-code
+    entrypoint: mvn
+    args: ["clean", "install", "-Dmaven.test.skip=true"]
+    
+  # Building Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build-image
+    args: [
+      'build', #This specifies that we want to build a Docker image.
+      '--tag=gcr.io/$PROJECT_ID/spring-boot-hello-world:$COMMIT_SHA', 
+      '.'
+      #"--tag": This is used to specify the tag for the Docker image. In this case, 
+      #the tag is "gcr.io/$PROJECT_ID/spring-boot-hello-world:$COMMIT_SHA", where $PROJECT_ID 
+      #is the ID of the Google Cloud project and "$COMMIT_SHA" is the unique identifier for the commit being built.
+      #"$COMMIT_SHA":  is a Cloud Build substitution variable that refers to the unique identifier of the Git commit 
+      #being built. When Cloud Build runs a build, it automatically sets several default substitution variables that can be used in the build configuration file.
+    ]
+    
+  # Pushing Docker image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-image
+    args: [
+      'push', 
+      'gcr.io/$PROJECT_ID/spring-boot-hello-world:$COMMIT_SHA'
+    ]
+    
+  # Deploying Docker image to GCE
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: deploy-gce
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        echo "Setting project ID"
+        gcloud config set project $PROJECT_ID
+        echo "Stopping and removing old container"
+        gcloud compute ssh --zone=$ZONE $GCE_INSTANCE_NAME --command="docker stop spring-boot-hello-world && docker rm spring-boot-hello-world"
+        echo "Running new container"
+        gcloud compute ssh --zone=$ZONE $GCE_INSTANCE_NAME --command="docker run -d --name spring-boot-hello-world -p 8080:8080 gcr.io/$PROJECT_ID/spring-boot-hello-world:$COMMIT_SHA"
+
+substitutions:
+  _IMAGE_NAME: spring-boot-hello-world
+  _COMMIT_SHA: COMMIT_SHA
+  _ZONE: us-central1-a
+  _GCE_INSTANCE_NAME: spring-boot-hello-world-api-sandbox
+  options:
+  substitution_option: 'ALLOW_LOOSE'
+  
+  
