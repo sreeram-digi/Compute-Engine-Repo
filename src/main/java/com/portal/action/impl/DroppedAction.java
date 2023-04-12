@@ -45,7 +45,7 @@ public class DroppedAction extends BaseAction {
 			adminService.deleteEvent(candidateFeedback.getEventId(),(String)input.get(ApplicationConstants.JWT_TOKEN));
 		}
 		canhistorylist.add(PortalUtils.getCanHistory(candidateFeedback,input));
-		candidateFeedback.setStatus(action+"-Dropped");
+		candidateFeedback.setStatus("Dropped");
 		candidateFeedback.setCurrentInterviewId(null);
 		candidateFeedback.setInterviewerName(null);
 		candidateFeedbackRepository.save(candidateFeedback);

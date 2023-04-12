@@ -139,8 +139,8 @@ public class CandidateServiceImpl implements CandidateService {
 				.orElseThrow(() -> new UserNotFoundException("User with Id " + id + " not found"));
 		
 		CandidateFeedback candidateFeedback = candidateFeedbackRepository.findById(id).orElse(new CandidateFeedback());
-		if(StringUtils.isNotEmpty(candidateFeedback.getStatus()))
-		{
+		if(StringUtils.isNotEmpty(candidateFeedback.getStatus())&&!PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)workflow.get(candidateFeedback.getStatus())).get("Allowed")).isEmpty())
+		{			
 			candidateFeedback.setNextSteps(PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)workflow.get(candidateFeedback.getStatus())).get("Allowed")));
 		}
 		candidate.setCandidateFeedback(candidateFeedback);

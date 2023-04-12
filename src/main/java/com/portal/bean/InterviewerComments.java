@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class InterviewerComments {
-	
+
 	private String interviwerId;
 	
 	private String candidateId;

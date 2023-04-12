@@ -164,19 +164,20 @@ public class AdminServiceImpl implements AdminService {
 		Interviewer interviewer = null;
 		UserResponse userresponse = null;
 		try {
-			//DecodedJWT jwt = JWT.decode(token);
-			//JwkProvider provider = new UrlJwkProvider(new URL("https:login.microsoftonline.com/common/discovery/v2.0/keys"));
-			//Jwk jwk = provider.get(jwt.getKeyId());
-			//Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
-			//algorithm.verify(jwt);
-			//interviewers = interviewerRepo.findByInterviewerEmail(String.valueOf(jwt.getClaim("preferred_username")).replace('\"',' ').trim().toLowerCase());
+			DecodedJWT jwt = JWT.decode(token);
+			JwkProvider provider = new UrlJwkProvider(new URL("https://login.microsoftonline.com/common/discovery/keys"));
+			Jwk jwk = provider.get(jwt.getKeyId());
+			Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
+			algorithm.verify(jwt);
+		//	interviewers = interviewerRepo.findByInterviewerEmail(String.valueOf(jwt.getClaim("email")).toString());
+			interviewers = interviewerRepo.findByInterviewerEmail(String.valueOf(jwt.getClaim("preferred_username")).replace('\"',' ').trim().toLowerCase());
 			
-			interviewers = interviewerRepo.findByInterviewerEmail(token);
+		//	interviewers = interviewerRepo.findByInterviewerEmail(token);
 			if(interviewers != null && interviewers.size() ==1) {
 				interviewer = interviewers.get(0);
 				if(interviewer.getInterviewerName()==null) {
-					//interviewer.setInterviewerName(String.valueOf(jwt.getClaim("name")).replace('\"',' ').trim());
-					interviewer.setInterviewerName(token);
+					interviewer.setInterviewerName(String.valueOf(jwt.getClaim("name")).replace('\"',' ').trim());
+					//interviewer.setInterviewerName(token);
 					interviewerRepo.save(interviewer);
 				}
 				userresponse = new UserResponse();
@@ -201,8 +202,8 @@ public class AdminServiceImpl implements AdminService {
 					accessList.clear();
 					accessList.add("externalUser");
 				}
-				//userresponse.setToken(jwtTokenUtil.generateToken(interviewer.getInterviewerName(), interviewer.getId(),accessList,"internalUser",String.valueOf(jwt.getClaim("oid")).replace('\"',' ').trim().toLowerCase()));
-				userresponse.setToken("123456");
+				userresponse.setToken(jwtTokenUtil.generateToken(interviewer.getInterviewerName(), interviewer.getId(),accessList,"internalUser",String.valueOf(jwt.getClaim("oid")).replace('\"',' ').trim().toLowerCase()));
+				//userresponse.setToken("123456");
 			}
 		}catch (SignatureVerificationException e){
 			log.error(e.getMessage());

@@ -248,7 +248,49 @@
 	"reEvaluateAction":{
 		"Name":"",
 		"Action":"com.portal.action.impl.ReEvaluteAction"
+		},
+	"Applied-OnHold":{
+		"Name": "",
+		"Action": "",
+		"Allowed": [
+		"Applied",
+	    "Drop"
+	    ]},
+	"ShortListed-OnHold":{
+		"Name": "",
+		"Action": "",
+		"Allowed": [
+		"ShortListed",
+	    "Drop"
+	    ]},
+    "SelectedRound1-OnHold":{
+		"Name": "",
+		"Action": "",
+		"Allowed": [
+		"SelectedRound1",
+	    "Drop"
+	    ]},
+	 "SelectedRound2-OnHold":{
+		"Name": "",
+		"Action": "",
+		"Allowed": [
+		"SelectedRound2",
+	    "Drop"
+	    ]},
+	 "Offered-OnHold":{
+	    "Name": "",
+		"Action": "",
+		"Allowed": [
+		"Offered",
+	    "Drop"
+	    ]
+	    },
+
+	 "Dropped":{
+		"Name": "",
+		"Action": "",
+		"Allowed":[]
 		}
-	}
+}
 
 

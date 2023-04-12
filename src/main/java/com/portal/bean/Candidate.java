@@ -103,6 +103,8 @@ public class Candidate {
 	@Transient
 	private String uploadedByEmail;
 	
+	
+	
 	public Interviewer getUpLoader()
 	{
 		if (upLoader != null)
