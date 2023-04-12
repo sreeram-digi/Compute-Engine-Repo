@@ -20,7 +20,7 @@ public class PortalUtils {
 		array.forEach(value->{
 			list.add(value);
 		});
-		return list;  
+		return list;
 	}
 	
 	public static CandidateHistory getCanHistory(CandidateFeedback candidateFeedback, Map input) {

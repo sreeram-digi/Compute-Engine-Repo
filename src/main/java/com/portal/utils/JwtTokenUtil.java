@@ -1,4 +1,4 @@
-  package com.portal.utils;
+package com.portal.utils;
 
 import java.util.Base64;
 import java.util.Calendar;

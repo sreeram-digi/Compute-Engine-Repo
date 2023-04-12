@@ -40,7 +40,6 @@ public class CommonNotSelectedAction extends BaseAction {
 		candidateFeedback.setStatus(action);
 		candidateFeedback.setCandidateHistory(canhistorylist);
 		candidateFeedbackRepository.save(candidateFeedback);
-		
 		super.action(input, workFlowNode, action);
 	}
 }
