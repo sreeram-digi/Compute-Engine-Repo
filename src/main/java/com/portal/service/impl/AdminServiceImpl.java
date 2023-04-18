@@ -374,7 +374,7 @@ public class AdminServiceImpl implements AdminService {
 	
 	private GraphServiceClient getGraphClient() {
 		final UsernamePasswordCredential usernamePasswordCredential = new UsernamePasswordCredentialBuilder()
-				.clientId("457941d4-6381-44c9-ab2f-9f70e80bfec5")
+				.clientId("473c4975-2d19-4854-859d-3be1fd26274c")
 				.username(applicationConfigurations.getFromemail())
 				.password(applicationConfigurations.getEmailPassword())
 				.build();
