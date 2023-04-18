@@ -374,7 +374,7 @@ public class AdminServiceImpl implements AdminService {
 	
 	private GraphServiceClient getGraphClient() {
 		final UsernamePasswordCredential usernamePasswordCredential = new UsernamePasswordCredentialBuilder()
-				.clientId("7580c34e-2be4-49c0-a5d3-24b41d634e65")
+				.clientId("457941d4-6381-44c9-ab2f-9f70e80bfec5")
 				.username(applicationConfigurations.getFromemail())
 				.password(applicationConfigurations.getEmailPassword())
 				.build();
@@ -387,9 +387,9 @@ public class AdminServiceImpl implements AdminService {
 	}
 	
 	private GraphServiceClient getGraphClientWithSecret() {
-		ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder().clientId("7580c34e-2be4-49c0-a5d3-24b41d634e65")
-															.clientSecret("rLP8Q~fb7pJRc5mUARmK9hvcDZkQjAbkhi9WSbLM")
-															.tenantId("c18ce958-2afb-4372-9d89-4490d18070f4")
+		ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder().clientId("473c4975-2d19-4854-859d-3be1fd26274c")
+															.clientSecret("mEt8Q~VrsXUGemJM8Bc-P6bPOtVpJLutVH5c7aC3")
+															.tenantId("457941d4-6381-44c9-ab2f-9f70e80bfec5")
 															.build();
 		
 		List<String> scopes = new ArrayList<>();
