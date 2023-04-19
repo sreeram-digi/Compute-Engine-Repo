@@ -41,6 +41,10 @@ public class UpdateCandidatePayload {
 	
 	private double relavantExperience;
 	
+	private double currentCtc;
+
+	private double expectedCtc;
+	
 	private String selectorId;
 	
 	private String upLoadedBy;

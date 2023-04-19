@@ -165,6 +165,12 @@ public class CandidateServiceImpl implements CandidateService {
 			candidate.setJobDescription(updateCandidatePayload.getJobDescription());
 		if(updateCandidatePayload.getJobTitle()!=null)
 			candidate.setJobTitle(updateCandidatePayload.getJobTitle());
+		
+		if(updateCandidatePayload.getCurrentCtc()>=0)
+			candidate.setCurrentCtc(updateCandidatePayload.getCurrentCtc());
+		if(updateCandidatePayload.getExpectedCtc()>0)
+			candidate.setExpectedCtc(updateCandidatePayload.getExpectedCtc());
+		
 		if(updateCandidatePayload.getExperience()>0)
 			candidate.setExperience(updateCandidatePayload.getExperience());
 		if(updateCandidatePayload.getRelavantExperience()>0)
