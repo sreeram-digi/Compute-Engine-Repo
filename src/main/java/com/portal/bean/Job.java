@@ -30,12 +30,23 @@ public class Job {
 	private String jobTitle;
 
 	@NotNull
-	private String startDate;
+	private String startingDateOfHiring;;
 
 	@NotNull
-	private String endDate;
+	private String endingDateOfHiring;;
 
 	@NotNull
 	private long positions;
-
+	
+	@NotNull
+	private String exprience;
+	
+	@NotNull
+	private String salary;
+	
+	@NotNull
+	private boolean isInternal;
+	
+	
+	
 }
