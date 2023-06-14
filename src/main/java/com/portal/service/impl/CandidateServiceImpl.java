@@ -32,6 +32,7 @@ import com.portal.action.ActionConstants;
 import com.portal.bean.Candidate;
 import com.portal.bean.CandidateFeedback;
 import com.portal.bean.Interviewer;
+import com.portal.bean.Job;
 import com.portal.bean.MembersForMeeting;
 import com.portal.bean.UpdateCandidatePayload;
 import com.portal.bean.WorkFlowBean;
@@ -39,6 +40,7 @@ import com.portal.exception.UserNotFoundException;
 import com.portal.repository.CandidateFeedbackRepository;
 import com.portal.repository.CandidateRepository;
 import com.portal.repository.InterviewerRepository;
+import com.portal.repository.JobRepository;
 import com.portal.service.AdminService;
 import com.portal.service.CandidateService;
 import com.portal.utils.JwtTokenUtil;
@@ -60,6 +62,9 @@ public class CandidateServiceImpl implements CandidateService {
 	private AdminService adminService;
 	@Autowired
 	private InterviewerRepository interviewerRepository;
+	
+	@Autowired
+	private JobRepository jobRepository;
 	
 	private EmailUtil emailUtil;
 	@Autowired
@@ -267,5 +272,29 @@ public class CandidateServiceImpl implements CandidateService {
 	    Date end=sdf.parse(endDate); 
 		return candidateRepository.getAllBetweenDates(start, end);
 	}
+
+	@Override
+	public List<Candidate> getAllCandidateByJobId(String joId) throws Exception {
+		
+		List<Candidate> candidateList = candidateRepository.findAll();
+		List<Candidate> candidateListWithJd = new ArrayList<>();
+		Job jobObject = jobRepository.findById(joId).orElseThrow(()-> new Exception("Job id not found"));
+		List<String> resumeCandidate = new ArrayList<>();
+ 		for(Candidate candidateObject:candidateList) {
+			
+			if(candidateObject.getJobDescription().equals(jobObject.getJobDescription())) {
+				candidateListWithJd.add(candidateObject);
+				resumeCandidate.add(candidateObject.getResume());
+			}
+		}
+ 		
+		System.out.println(candidateListWithJd);
+		System.out.println(resumeCandidate);
+		return null;
+	}
+	
+	
+	
+	
 	
 }

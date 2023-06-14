@@ -43,4 +43,7 @@ public interface CandidateService {
 	List<Candidate> getAllCandidatesExcel();
 	
 	List<Candidate> getAllCandidatesExcel(String startDate, String endDate) throws ParseException;
+	
+	List<Candidate> getAllCandidateByJobId(String joId) throws Exception;
+	
 }

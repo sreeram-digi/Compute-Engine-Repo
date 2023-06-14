@@ -14,21 +14,32 @@ import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 
 import com.portal.flow.FileLoader;
 import org.springframework.web.method.HandlerMethod;
 
 @SpringBootApplication
 @OpenAPIDefinition(info = @Info(title = "Recruitment Portal API",
-		version = "v1",
-		description = "These are APIs for Recruitment Portal"),
-		servers = @Server(url = "/"))
+version = "v1",
+description = "These are APIs for Recruitment Portal"),
+servers = @Server(url = "/"))
+@EnableScheduling
 public class PortalApplication {
-
+	
 	public static void main(String[] args) {
 		SpringApplication.run(PortalApplication.class, args);
 	}
-	
+
 	@Bean(name = "workflow")
 	public JSONObject WorkFlowJson() throws IOException {
 		FileLoader fileloader = new FileLoader();
@@ -44,4 +55,10 @@ public class PortalApplication {
 			return operation;
 		};
 	}
+
+
 }
+
+
+
+
