@@ -1,5 +1,6 @@
 package com.portal.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -8,6 +9,7 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +20,9 @@ import java.util.regex.Pattern;
 
 import javax.validation.Valid;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -27,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,6 +43,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,14 +51,18 @@ import com.portal.action.ActionConstants;
 import com.portal.bean.Candidate;
 import com.portal.bean.CandidateFeedback;
 import com.portal.bean.Interviewer;
+import com.portal.bean.Job;
 import com.portal.bean.UpdateCandidatePayload;
 import com.portal.bean.WorkFlowBean;
 import com.portal.excel.CandidateExcelExporter;
 import com.portal.exception.CandidatePresentException;
 import com.portal.exception.UserNotFoundException;
+import com.portal.repository.CandidateRepository;
+import com.portal.repository.JobRepository;
 import com.portal.service.AdminService;
 import com.portal.service.CandidateService;
 import com.portal.service.InterviewerService;
+import com.portal.utils.PortalUtils;
 import com.portal.validations.ValidateEmailPhoneNumberDb;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,9 +78,18 @@ public class CandidateController {
 	private InterviewerService interviewerService;
 		
 	@Value("${resume.paths}")
-	private String path;
+	private String pathhs;
 	
 	private AdminService adminService;
+	
+	@Autowired
+	CandidateRepository candidateRepository;
+	
+	@Autowired
+	JobRepository jobRepository;
+	
+	
+	
 
 	private static final String DIGITS = "\\d+$";
 	
@@ -92,7 +111,7 @@ public class CandidateController {
 	public Candidate createCandidateWithFile(@ModelAttribute @ValidateEmailPhoneNumberDb Candidate candidate, @RequestParam(name = "file", required = false) MultipartFile file, @RequestHeader(required = false, name="isExternalUser") boolean externalUser, @RequestHeader(value="token") String token) throws Exception {
 		log.debug("Cadidate With Details : " + candidate);
 		Candidate candidateCreated = createCandidateWithOutFile(candidate, token, externalUser);
-		updateCandidateResume(file, candidateCreated.getId());
+		//updateCandidateResume(file, candidateCreated.getId());
 		return candidateCreated;
 		
 	}
@@ -198,7 +217,7 @@ public class CandidateController {
 
 	@GetMapping(value = "/candidate/download/{id}")
 	public ResponseEntity getResume(@PathVariable String id) throws UserNotFoundException, MalformedURLException {
-		Path filePath = Paths.get(path + candidateService.getCandidateById(id).getResume());
+		Path filePath = Paths.get(pathhs + candidateService.getCandidateById(id).getResume());
 		Resource resource = new UrlResource(filePath.toUri());
 		return ResponseEntity.ok()
 				.contentType(MediaType.parseMediaType("application/octet-stream"))
@@ -207,21 +226,73 @@ public class CandidateController {
 	}
 
 	@Operation(summary = "This method is used to Upload Candidate Resume")
-	@PostMapping("/candidate/upload/{id}")
-	public void uploadFile(@RequestParam("file") MultipartFile file, @PathVariable("id") String id) throws Exception {
-		updateCandidateResume(file, id);
+	@PostMapping(value="/candidate/upload/{id}/{jobId}", consumes = {"multipart/form-data"})
+	public void uploadFile(@RequestPart("file") MultipartFile file, @PathVariable("id") String id, @PathVariable("jobId") String jobId ) throws Exception {
+		updateCandidateResume(file, id,jobId);
 	}
 	
-	private void updateCandidateResume(MultipartFile file, String id) throws Exception {
-		String[] fileFrags = file.getOriginalFilename().split("\\.");
-		String resumeName = id + "." + fileFrags[fileFrags.length - 1];
-		Candidate  candidate = candidateService.getCandidateById(id);
-		if(Files.exists(Paths.get(path + "/" + candidate.getResume())))
-			Files.deleteIfExists(Paths.get(path + "/" + candidate.getResume()));
-		Path root = Paths.get(path);
-		Files.copy(file.getInputStream(), root.resolve(resumeName));
-		candidateService.updateCandidateResume(id, fileFrags[fileFrags.length - 1]);
+	private void updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception {
+		
+		System.out.println(file.getName());
+		Candidate candidate = candidateRepository.findById(id).orElseThrow(()-> new UserNotFoundException("Candidate not found"));
+		Job adminJobDescription = jobRepository.findById(jobId).get();
+
+		ArrayList<String> arrayList = new ArrayList<>();
+		String candidateSkillSet = candidate.getSkills();
+
+		String[] candidateSkillSetArray = candidateSkillSet.split(",");
+		for(String individualSkillSetArray : candidateSkillSetArray) {
+			if(adminJobDescription.getJobDescription().contains(individualSkillSetArray)) {
+				arrayList.add(individualSkillSetArray);
+			}
+		}
+
+		File sourceFile = new File(pathhs);
+		System.out.println("Source file  "+sourceFile.getAbsolutePath());
+
+		
+		for(int i=0; i<arrayList.size(); i++) {
+
+			System.out.println("ffffffffffffffffffff"+i);
+			if (sourceFile.exists()) {
+				String destinationFolderPath = getDestinationFolderPath(arrayList.get(i));
+
+				if (destinationFolderPath != null) {
+					File destinationFolder = new File(destinationFolderPath);
+					System.out.println(destinationFolder.getAbsolutePath() +"   "+destinationFolder.getPath());
+					if (destinationFolder.exists() && destinationFolder.isDirectory()) {
+						
+						
+						String[] fileFrags = file.getOriginalFilename().split("\\.");
+						String resumeName = id + "." + fileFrags[fileFrags.length - 1];
+						Candidate  candidate1 = candidateService.getCandidateById(id);
+						if(Files.exists(Paths.get(pathhs + "/" + candidate1.getResume())))
+							Files.deleteIfExists(Paths.get(pathhs + "/" + candidate1.getResume()));
+						Path root = Paths.get(destinationFolderPath);
+						Files.copy(file.getInputStream(), root.resolve(resumeName));
+						candidateService.updateCandidateResume(id, fileFrags[fileFrags.length - 1]);
+						
+
+					} else {
+						System.out.println("Destination folder does not exist.");
+					}
+				} else {
+					System.out.println("Invalid dropdown value.");
+				}
+			} else {
+				System.out.println("Source file does not exist.");
+			}
+		}		
+		
 	}
+	
+	private String getDestinationFolderPath(String folderPath) {
+        String destinationFolderPath = null;
+        destinationFolderPath = pathhs+folderPath;
+        return destinationFolderPath;
+    }
+	
+	
 	
 	/**
 	 * The Method will create Excel report for the list of candidates

@@ -47,6 +47,8 @@ public class Job {
 	@NotNull
 	private boolean isInternal;
 	
-	
+	@NotNull
+    private String skillSet;
+
 	
 }
