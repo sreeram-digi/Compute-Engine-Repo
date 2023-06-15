@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +77,9 @@ public class CandidateServiceImpl implements CandidateService {
 
 	@Value("${resume.paths}")
 	private String path;
-
+	
+	@Value("${otherResume.path}")
+	private String otherResume;
 
 	@Autowired
 	private ApplicationConfigurations applicationConfigurations;
@@ -315,11 +316,28 @@ public class CandidateServiceImpl implements CandidateService {
 		ArrayList<String> arrayList = new ArrayList<>();
 		String candidateSkillSet = candidate.getSkills();
 
+		String[] fileFrags = file.getOriginalFilename().split("\\.");
+		String resumeName = id + "." + fileFrags[fileFrags.length - 1];
+		
 		String[] candidateSkillSetArray = candidateSkillSet.split(",");
 		for(String individualSkillSetArray : candidateSkillSetArray) {
 			if(adminJobDescription.getJobDescription().contains(individualSkillSetArray)) {
 				arrayList.add(individualSkillSetArray);
 			}
+			else {
+				String otherFolderPath=otherResume;
+				File fileObject = new File(otherFolderPath);
+				
+				if(!fileObject.exists()) {
+					fileObject.mkdir();
+				}
+				Path root = Paths.get(otherFolderPath);
+			
+				Files.copy(file.getInputStream(), root.resolve(resumeName));
+				System.out.println("copied to new location");
+
+				}		
+			
 		}
 
 		List<String> adminJobSkillsSetArray=Arrays.asList(adminJobDescription.getJobDescription().split(","));
@@ -342,7 +360,6 @@ public class CandidateServiceImpl implements CandidateService {
 				if(folder.mkdir()) {
 					log.info("folder created"+ folder.getName());
 				}
-
 				else {
 					throw new Exception("Folder wasn't been able to create");
 				}
@@ -361,25 +378,18 @@ public class CandidateServiceImpl implements CandidateService {
 					File destinationFolder = new File(destinationFolderPath);
 					System.out.println(destinationFolder.getAbsolutePath() +"   "+destinationFolder.getPath());
 					if (destinationFolder.exists() && destinationFolder.isDirectory()) {
-
-						String[] fileFrags = file.getOriginalFilename().split("\\.");
-						String resumeName = id + "." + fileFrags[fileFrags.length - 1];
+						
 						CandidateFeedback candidateFeedback = candidateFeedbackRepository.findById(id).orElse(new CandidateFeedback());
 						if(StringUtils.isNotEmpty(candidateFeedback.getStatus())&&!PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)
 								workflow.get(candidateFeedback.getStatus())).get("Allowed")).isEmpty()){	
-
 							candidateFeedback.setNextSteps(PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)workflow.get(candidateFeedback.getStatus())).get("Allowed")));
 						}
-
 						candidate.setCandidateFeedback(candidateFeedback);
 
 						if(Files.exists(Paths.get(path + "/" + candidate.getResume())))
 							Files.deleteIfExists(Paths.get(path + "/" + candidate.getResume()));
 						Path root = Paths.get(destinationFolderPath);
 						Files.copy(file.getInputStream(), root.resolve(resumeName));
-						//						candidateService.updateCandidateResume(id, fileFrags[fileFrags.length - 1]);
-						candidate.setResume(id+"."+fileFrags[fileFrags.length - 1]);
-						candidateRepository.save(candidate);
 
 					}
 					else {
@@ -394,6 +404,10 @@ public class CandidateServiceImpl implements CandidateService {
 				throw new Exception("Source file does not exist.");
 			}
 		}
+		
+		candidate.setResume(id+"."+fileFrags[fileFrags.length - 1]);
+		candidateRepository.save(candidate);
+		
 		return "operation comepleted";		
 
 	}

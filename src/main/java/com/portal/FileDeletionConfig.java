@@ -33,9 +33,9 @@ public class FileDeletionConfig {
 	 */
 	@Scheduled(fixedDelay= 60000)
 	public  void running() {
-		
+
 		log.info("task in its "+ count+ "iteration");
-		
+
 		String savingFileName="cb569050-6a56-41c8-b288-d70951730105.xlsx";
 		File folder = new File(folderPath);
 
@@ -76,15 +76,15 @@ public class FileDeletionConfig {
 					LocalDate fileDeletionDate = fileCreationDate.plusYears(1);
 
 					if(fileObject.getName().equals(savingFileName)) {
-						
+
 						log.info("File name matched moving to reserved folder"+folderPath);
-						
+
 						fileObject.renameTo(new File((folderPath)));
 
 						if(LocalDate.now().equals(LocalDate.now())) {
 
 							fileObject.delete();
-							
+
 							log.info("Folder deleted");
 						}
 						else {
