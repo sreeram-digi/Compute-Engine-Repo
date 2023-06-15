@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.json.JSONObject;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.portal.bean.Candidate;
 import com.portal.bean.UpdateCandidatePayload;
@@ -46,4 +47,6 @@ public interface CandidateService {
 	
 	List<Candidate> getAllCandidateByJobId(String joId) throws Exception;
 	
+
+	String updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception;
 }

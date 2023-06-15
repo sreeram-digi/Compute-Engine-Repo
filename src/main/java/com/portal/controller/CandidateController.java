@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -64,16 +65,17 @@ import lombok.extern.slf4j.Slf4j;
 public class CandidateController {
 
 	private CandidateService candidateService;
-	
+
 	private InterviewerService interviewerService;
-		
+
 	@Value("${resume.paths}")
 	private String path;
 	
 	private AdminService adminService;
 
+
 	private static final String DIGITS = "\\d+$";
-	
+
 	/*
 	 * public CandidateController() {
 	 * 
@@ -85,7 +87,7 @@ public class CandidateController {
 		this.adminService = adminService;
 		this.interviewerService = interviewerService;
 	}
-	
+
 	@CrossOrigin(maxAge = 3600,origins = "*")
 	@Operation(summary = "This method is used to Create Candidate with File")
 	@PostMapping(value = "/candidate/withFile")
@@ -94,9 +96,9 @@ public class CandidateController {
 		Candidate candidateCreated = createCandidateWithOutFile(candidate, token, externalUser);
 		updateCandidateResume(file, candidateCreated.getId());
 		return candidateCreated;
-		
+
 	}
-	
+
 	private Candidate createCandidateWithOutFile(Candidate candidate, String token, boolean externalUser) throws Exception {
 		UUID uuid = UUID.randomUUID();
 		candidate.setId(uuid.toString());
@@ -106,7 +108,7 @@ public class CandidateController {
 		JSONObject jsonObject = candidateService.decodeUserToken(token);
 		Interviewer interviewer = interviewerService.getInterviewerById(jsonObject.getString("userId"));
 		candidate.setUpLoader(interviewer);
-		
+
 		candidateService.createCandidate(candidate);
 		//This helps to move any candidate to Applied stage.
 		WorkFlowBean workflow = new WorkFlowBean();
@@ -114,7 +116,7 @@ public class CandidateController {
 		valueMap.put(ActionConstants.CANDIDATE_ID, uuid.toString());
 		workflow.setValueMap(valueMap);
 		adminService.callWorkFlow(workflow, true,null);
-		
+
 		//This helps to move any candidate to Pending short list stage if user is not external and selector is not null.
 		if(!externalUser && candidate.getSelectorId() != null) {
 			valueMap.put(ActionConstants.SELECTOR_ID, candidate.getSelectorId());
@@ -157,16 +159,16 @@ public class CandidateController {
 	@GetMapping(value = "/candidate/{page}/{records}")
 	public Page<Candidate> getAllCandidatesWithPagination(@PathVariable(value = "page") int page, @PathVariable(value = "records") int records,@RequestHeader(value="token") String token) {
 		return candidateService.getAllCandidatesWithPagination(page, records, token);
-		
+
 	}
 
 	@Operation(summary = "This method is used to Get all Candidates")
 	@GetMapping(value = "/candidate")
 	public List<Candidate> getAllCandidates(@RequestHeader(value="token") String token) {
 		return candidateService.getAllCandidates(token);
-		
+
 	}
-	
+
 	@Operation(summary = "This method is used to Get get Candidate By Id")
 	@GetMapping(value = "/candidate/{id}")
 	public Candidate getCandidateId(@PathVariable String id) throws UserNotFoundException {
@@ -206,7 +208,7 @@ public class CandidateController {
 				.body(resource);
 	}
 
-	@Operation(summary = "This method is used to Upload Candidate Resume")
+//	@Operation(summary = "This method is used to Upload Candidate Resume")
 	@PostMapping("/candidate/upload/{id}")
 	public void uploadFile(@RequestParam("file") MultipartFile file, @PathVariable("id") String id) throws Exception {
 		updateCandidateResume(file, id);
@@ -223,6 +225,12 @@ public class CandidateController {
 		candidateService.updateCandidateResume(id, fileFrags[fileFrags.length - 1]);
 	}
 	
+	@Operation(summary = "This method is used to Upload Candidate Resume")
+	@PostMapping(value="/candidate/upload/{id}/{jobId}", consumes = {"multipart/form-data"})
+	public	String uploadFile(@RequestPart("file") MultipartFile file, @PathVariable("id") String id, @PathVariable("jobId") String jobId ) throws Exception {
+		return candidateService.updateCandidateResume(file, id,jobId);
+	}
+	
 	/**
 	 * The Method will create Excel report for the list of candidates
 	 * This will have fields ID,firstName,lastName,phoneNumber,email,
@@ -233,26 +241,26 @@ public class CandidateController {
 	 * @throws ParseException 
 	 */
 	@Operation(summary = "This method is used to download the excel report of all candidates")
-	 @GetMapping(value = "/candidate/export/excel")
-	    public ResponseEntity<Resource> exportToExcel(@RequestParam(value = "startDate", required = false) String startDate,
-	    		@RequestParam(value = "endDate", required = false) String endDate) throws IOException, ParseException {
-		 
-		 DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-		 String currentDateTime = dateFormatter.format(new Date());
-		 	String fileName = "candidates_" + currentDateTime + ".xlsx";
+	@GetMapping(value = "/candidate/export/excel")
+	public ResponseEntity<Resource> exportToExcel(@RequestParam(value = "startDate", required = false) String startDate,
+			@RequestParam(value = "endDate", required = false) String endDate) throws IOException, ParseException {
 
-	        List<Candidate> listCandidate = null;
-	        if(startDate != null && endDate != null) {
-	        	listCandidate = candidateService.getAllCandidatesExcel(startDate, endDate);
-	        }else {
-	        	listCandidate = candidateService.getAllCandidatesExcel();
-	        }
-	         
-	        CandidateExcelExporter excelExporter = new CandidateExcelExporter(listCandidate);
-	         
-	        InputStreamResource file = new InputStreamResource(excelExporter.export());  
-	        
-	        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName).contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
-	    }  
-	
+		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+		String currentDateTime = dateFormatter.format(new Date());
+		String fileName = "candidates_" + currentDateTime + ".xlsx";
+
+		List<Candidate> listCandidate = null;
+		if(startDate != null && endDate != null) {
+			listCandidate = candidateService.getAllCandidatesExcel(startDate, endDate);
+		}else {
+			listCandidate = candidateService.getAllCandidatesExcel();
+		}
+
+		CandidateExcelExporter excelExporter = new CandidateExcelExporter(listCandidate);
+
+		InputStreamResource file = new InputStreamResource(excelExporter.export());  
+
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName).contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
+	}  
+
 }
