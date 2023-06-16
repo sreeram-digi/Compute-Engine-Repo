@@ -30,8 +30,8 @@ public class JobServiceImpl implements JobService {
 	@Value("${resume.paths}")
 	private String path;
 	
-	@Value("${otherResume.path}")
-	private String otherResume;
+//	@Value("${otherResume.path}")
+//	private String otherResume;
 	
 	@Override
 	public Job saveJob(Job job) {

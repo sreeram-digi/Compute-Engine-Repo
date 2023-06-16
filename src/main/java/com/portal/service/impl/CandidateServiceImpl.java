@@ -78,8 +78,8 @@ public class CandidateServiceImpl implements CandidateService {
 	@Value("${resume.paths}")
 	private String path;
 	
-	@Value("${otherResume.path}")
-	private String otherResume;
+//	@Value("${otherResume.path}")
+//	private String otherResume;
 
 	@Autowired
 	private ApplicationConfigurations applicationConfigurations;
