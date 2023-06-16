@@ -57,7 +57,7 @@ public class FileDeletionConfig {
 
 	private  void deleteFolder(File folder,String savingFileName) {
 
-		String folderPath = reservedPath +"/"+savingFileName;
+		String folderPath = reservedPath+savingFileName;
 		File[] files = folder.listFiles();
 
 		if (files != null) {
@@ -81,7 +81,7 @@ public class FileDeletionConfig {
 
 						fileObject.renameTo(new File((folderPath)));
 
-						if(LocalDate.now().equals(LocalDate.now())) {
+						if(fileDeletionDate.equals(LocalDate.now())) {
 
 							fileObject.delete();
 
