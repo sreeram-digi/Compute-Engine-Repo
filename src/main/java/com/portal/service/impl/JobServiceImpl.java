@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,7 @@ public class JobServiceImpl implements JobService {
 		
 		File fileObject = new File(pathOfFiles);
 		List<File> fileListPresent=Arrays.asList(fileObject.listFiles());
-		List<String> fileNames=fileListPresent.stream().map(File::getName).toList();
+		List<String> fileNames=fileListPresent.stream().map(File::getName).collect(Collectors.toList());)
 		
 		for(String skillsObject:jobSkillSetArray) {
 		
