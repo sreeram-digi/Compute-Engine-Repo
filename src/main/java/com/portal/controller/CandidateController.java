@@ -208,7 +208,7 @@ public class CandidateController {
 				.body(resource);
 	}
 
-//	@Operation(summary = "This method is used to Upload Candidate Resume")
+	@Operation(summary = "This method is used to Upload Candidate Resume")
 	@PostMapping("/candidate/upload/{id}")
 	public void uploadFile(@RequestParam("file") MultipartFile file, @PathVariable("id") String id) throws Exception {
 		updateCandidateResume(file, id);

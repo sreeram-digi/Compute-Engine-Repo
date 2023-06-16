@@ -1,5 +1,7 @@
 package com.portal.bean;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
@@ -30,23 +32,33 @@ public class Job {
 	private String jobTitle;
 
 	@NotNull
-	private String startingDateOfHiring;;
+	private String applyingPostions;
+	
+	@NotNull
+    private long numberOfPositionsAvaiable;
 
-	@NotNull
-	private String endingDateOfHiring;;
+    @NotNull
+    private String minimumAndMaximumExprience;
 
-	@NotNull
-	private long positions;
-	
-	@NotNull
-	private String exprience;
-	
-	@NotNull
-	private String salary;
-	
-	@NotNull
-	private boolean isInternal;
-	
-	
+    @NotNull
+    private String minimumAndMaximumSalary;
+
+    @NotNull
+    private String recurtierAssigned;
+
+    @NotNull
+    private List<Interviewer> interviewerPanel;
+
+    @NotNull
+    private boolean openForVendors;
+
+    @NotNull
+    private boolean isInternal;
+
+    @NotNull
+    private String skillSet;
+    
+    @NotNull
+    private String workType;
 	
 }

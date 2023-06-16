@@ -1,7 +1,13 @@
 package com.portal.service.impl;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.portal.bean.Job;
@@ -20,10 +26,36 @@ public class JobServiceImpl implements JobService {
 	public JobServiceImpl(JobRepository jobRepository) {
 		this.jobRepository = jobRepository;
 	}
-
+	
+	@Value("${resume.paths}")
+	private String path;
+	
+	@Value("${otherResume.path}")
+	private String otherResume;
+	
 	@Override
 	public Job saveJob(Job job) {
 		log.debug("saveJob(): saving the Job : " + job);
+		//folder creation 
+		
+		List<String> jobSkillSetArray =Arrays.asList(job.getSkillSet().split(","));
+		
+		String pathOfFiles=path;
+		
+		File fileObject = new File(pathOfFiles);
+		List<File> fileListPresent=Arrays.asList(fileObject.listFiles());
+		List<String> fileNames=fileListPresent.stream().map(File::getName).toList();
+		
+		for(String skillsObject:jobSkillSetArray) {
+		
+		if(!fileNames.contains(skillsObject)) {
+			File newFile = new File(path+"/"+skillsObject);
+			if(!newFile.exists())
+			newFile.mkdir();
+			System.out.println("folder created");
+		}
+		}
+	
 		return this.jobRepository.save(job);
 	}
 

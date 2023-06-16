@@ -313,61 +313,13 @@ public class CandidateServiceImpl implements CandidateService {
 		Candidate candidate = candidateRepository.findById(id).orElseThrow(()-> new UserNotFoundException("Candidate not found"));
 		Job adminJobDescription = jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job id not found"));
 
-		ArrayList<String> arrayList = new ArrayList<>();
+		List<String> arrayList = Arrays.asList(adminJobDescription.getSkillSet().split(","));
 		String candidateSkillSet = candidate.getSkills();
 
 		String[] fileFrags = file.getOriginalFilename().split("\\.");
 		String resumeName = id + "." + fileFrags[fileFrags.length - 1];
 		
-		String[] candidateSkillSetArray = candidateSkillSet.split(",");
-		for(String individualSkillSetArray : candidateSkillSetArray) {
-			if(adminJobDescription.getJobDescription().contains(individualSkillSetArray)) {
-				arrayList.add(individualSkillSetArray);
-			}
-			else {
-				String otherFolderPath=otherResume;
-				File fileObject = new File(otherFolderPath);
-				
-				if(!fileObject.exists()) {
-					fileObject.mkdir();
-				}
-				Path root = Paths.get(otherFolderPath);
-			
-				Files.copy(file.getInputStream(), root.resolve(resumeName));
-				System.out.println("copied to new location");
-
-				}		
-			
-		}
-
-		List<String> adminJobSkillsSetArray=Arrays.asList(adminJobDescription.getJobDescription().split(","));
-
 		File sourceFile = new File(path);
-
-		List<File>	listofFiles=Arrays.asList(sourceFile.listFiles());
-		List<String> filenames= listofFiles.stream().map(File::getName).toList();
-
-		List<String> filesDoesnotExists=adminJobSkillsSetArray.stream().filter(p ->filenames.stream().noneMatch((p::contains))).toList();
-
-		for(String folderCreations:filesDoesnotExists) {
-
-			String folderPath = path+"/"+folderCreations;
-
-			File folder = new File(folderPath);
-
-			if(!folder.exists()) {
-
-				if(folder.mkdir()) {
-					log.info("folder created"+ folder.getName());
-				}
-				else {
-					throw new Exception("Folder wasn't been able to create");
-				}
-			}
-			else {
-				throw new Exception("Folder Already exists");
-			}
-		}
 
 		for(int i=0; i<arrayList.size(); i++) {
 
@@ -406,6 +358,8 @@ public class CandidateServiceImpl implements CandidateService {
 		}
 		
 		candidate.setResume(id+"."+fileFrags[fileFrags.length - 1]);
+		candidate.setJobId(jobId);
+		System.out.println("job id"+candidate.getId());
 		candidateRepository.save(candidate);
 		
 		return "operation comepleted";		

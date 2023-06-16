@@ -23,6 +23,8 @@ public class PortalUtils {
 		return list;
 	}
 	
+
+	
 	public static CandidateHistory getCanHistory(CandidateFeedback candidateFeedback, Map input) {
 		CandidateHistory canHistory = new CandidateHistory();
 
