@@ -37,7 +37,6 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public Job saveJob(Job job) {
 		log.debug("saveJob(): saving the Job : " + job);
-		//folder creation 
 		
 		List<String> jobSkillSetArray =Arrays.asList(job.getSkillSet().split(","));
 		
@@ -45,8 +44,7 @@ public class JobServiceImpl implements JobService {
 		
 		File fileObject = new File(pathOfFiles);
 		List<File> fileListPresent=Arrays.asList(fileObject.listFiles());
-		List<String> fileNames=fileListPresent.stream().map(File::getName).collect(Collectors.toList());)
-		
+		List<String> fileNames=	fileListPresent.stream().map(File::getName).collect(Collectors.toList());
 		for(String skillsObject:jobSkillSetArray) {
 		
 		if(!fileNames.contains(skillsObject)) {
