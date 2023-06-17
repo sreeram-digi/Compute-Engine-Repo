@@ -44,7 +44,9 @@ public class JobServiceImpl implements JobService {
 		
 		File fileObject = new File(pathOfFiles);
 		List<File> fileListPresent=Arrays.asList(fileObject.listFiles());
+		
 		List<String> fileNames=	fileListPresent.stream().map(File::getName).collect(Collectors.toList());
+		
 		for(String skillsObject:jobSkillSetArray) {
 		
 		if(!fileNames.contains(skillsObject)) {
