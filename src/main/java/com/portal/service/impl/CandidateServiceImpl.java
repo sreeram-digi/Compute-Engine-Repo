@@ -287,21 +287,12 @@ public class CandidateServiceImpl implements CandidateService {
 	@Override
 	public List<Candidate> getAllCandidateByJobId(String joId) throws Exception {
 
-		List<Candidate> candidateList = candidateRepository.findAll();
-		List<Candidate> candidateListWithJd = new ArrayList<>();
-		Job jobObject = jobRepository.findById(joId).orElseThrow(()-> new Exception("Job id not found"));
-		List<String> resumeCandidate = new ArrayList<>();
-		for(Candidate candidateObject:candidateList) {
-
-			if(candidateObject.getJobDescription().equals(jobObject.getJobDescription())) {
-				candidateListWithJd.add(candidateObject);
-				resumeCandidate.add(candidateObject.getResume());
-			}
+		List<Candidate> candidateList = candidateRepository.findByJobId(joId) ;
+		
+		if(candidateList!=null) {
+			return candidateList;
 		}
-
-		System.out.println(candidateListWithJd);
-		System.out.println(resumeCandidate);
-		return null;
+		return candidateList;
 	}
 
 

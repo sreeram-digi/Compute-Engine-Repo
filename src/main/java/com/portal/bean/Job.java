@@ -29,10 +29,7 @@ public class Job {
 	private String location;
 	
 	@NotNull
-	private String jobTitle;
-
-	@NotNull
-	private String applyingPostions;
+	private String jobTitle; 
 	
 	@NotNull
     private long numberOfPositionsAvaiable;
@@ -44,7 +41,7 @@ public class Job {
     private String minimumAndMaximumSalary;
 
     @NotNull
-    private String recurtierAssigned;
+    private List<Interviewer> recurtierAssigned;
 
     @NotNull
     private List<Interviewer> interviewerPanel;

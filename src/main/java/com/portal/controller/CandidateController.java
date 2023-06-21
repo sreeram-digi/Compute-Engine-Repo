@@ -133,38 +133,7 @@ public class CandidateController {
 	
 	
 	
-	private Candidate createCandidateWithOutFileWithJobId(Candidate candidate, String token, boolean externalUser,String jobId) throws Exception {
-		UUID uuid = UUID.randomUUID();
-		candidate.setId(uuid.toString());
-		CandidateFeedback canFeedBack = new CandidateFeedback();
-		canFeedBack.setId(uuid.toString());
-		candidate.setCandidateFeedback(canFeedBack);
-		candidate.setJobId(jobId);
-		JSONObject jsonObject = candidateService.decodeUserToken(token);
-		Interviewer interviewer = interviewerService.getInterviewerById(jsonObject.getString("userId"));
-		candidate.setUpLoader(interviewer);
-
-		candidateService.createCandidate(candidate);
-		//This helps to move any candidate to Applied stage.
-		WorkFlowBean workflow = new WorkFlowBean();
-		Map<String, Object> valueMap = new HashMap<>();
-		valueMap.put(ActionConstants.CANDIDATE_ID, uuid.toString());
-		workflow.setValueMap(valueMap);
-		adminService.callWorkFlow(workflow, true,null);
-
-		//This helps to move any candidate to Pending short list stage if user is not external and selector is not null.
-		if(!externalUser && candidate.getSelectorId() != null) {
-			valueMap.put(ActionConstants.SELECTOR_ID, candidate.getSelectorId());
-			workflow.setAction("PendingShortList");
-			workflow.setValueMap(valueMap);
-			adminService.callWorkFlow(workflow, false, null);
-		}
-
-		Candidate createdCandidate = candidateService.getCandidateById(uuid.toString());
-		//solrIntegrationService.addCandidateDataToSolr(createdCandidate);
-		return createdCandidate;
-	}
-
+	
 	
 	@CrossOrigin(maxAge = 3600,origins = "*")
 	@Operation(summary = "This method is used to Create Candidate without file")
@@ -175,12 +144,7 @@ public class CandidateController {
 		return createCandidateWithOutFile(candidate, token, externalUser);	
 	}
 	
-	@Operation(summary = "This method is used to Create Candidate without file with Jobid")
-	@PostMapping(value="/candidatejobId/{jobId}")
-	public Candidate createCandidateWithJobId(@Valid @RequestBody Candidate candidate,@RequestHeader(required = false, name="isExternalUser") boolean externalUser,
-			@RequestHeader(value="token") String token,@PathVariable("jobId") String jobId) throws Exception {
-		return createCandidateWithOutFileWithJobId(candidate, token, externalUser,jobId);
-	}
+	
 
 	@Operation(summary = "This method is used to find duplicate email and phonenumber")
 	@PostMapping(value = "/candidate/{value}")
@@ -269,7 +233,7 @@ public class CandidateController {
 		candidateService.updateCandidateResume(id, fileFrags[fileFrags.length - 1]);
 	}
 	
-	@Operation(summary = "This method is used to Upload Candidate Resume")
+	@Operation(summary = "This method is used to Upload Candidate Resume With JobId")
 	@PostMapping(value="/candidate/upload/{id}/{jobId}", consumes = {"multipart/form-data"})
 	public	String uploadFile(@RequestPart("file") MultipartFile file, @PathVariable("id") String id, @PathVariable("jobId") String jobId ) throws Exception {
 		return candidateService.updateCandidateResume(file, id,jobId);
@@ -307,4 +271,10 @@ public class CandidateController {
 		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName).contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
 	}  
 
+	@Operation(summary = "This method is used to get candidateList with jobId")
+	@GetMapping(value = "/candidateListWithJobId/{jobId}")
+	public List<Candidate> getCandidatesWithJobId(@PathVariable("jobId") String jobId) throws Exception{
+		return candidateService.getAllCandidateByJobId(jobId);
+	}
+	
 }
