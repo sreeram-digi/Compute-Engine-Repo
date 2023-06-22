@@ -54,6 +54,6 @@ public interface CandidateService {
 	
 	Map<String,Integer> getCandidateBySelectedWorkflowStatus(String inputDropdownCriteria);
 	
-	
+	List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria);
 	
 }

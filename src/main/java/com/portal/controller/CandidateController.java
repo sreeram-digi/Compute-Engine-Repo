@@ -271,11 +271,15 @@ public class CandidateController {
 	}
 	
 	@Operation( summary = "This methods will return a map : Key = X-axis fields & Value = Y-axis plotting data")
-	@GetMapping( value = "/getAllCandidateFeedBackValues/{inputDropdownCriteria}")
+	@GetMapping( value = "/getAllCandidateFeedBackCriteria/{inputDropdownCriteria}")
 	public Map<String, Integer> getCandidateBySelectedWorkflowStatus(@PathVariable("inputDropdownCriteria") String inputDropdownCriteria) {
 		return candidateService.getCandidateBySelectedWorkflowStatus(inputDropdownCriteria);
 	}
 	
+	@GetMapping( value = "getAllCandidateInformationWithStatus/{inputStatusCriteria}" )
+	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(@PathVariable("inputStatusCriteria") String inputStatusCriteria) {
+		return candidateService.listOfCandidatesForSpecificSelectedWorkFLowStatus(inputStatusCriteria);
+	}
 	
 	
 	

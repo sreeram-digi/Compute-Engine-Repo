@@ -366,7 +366,7 @@ public class CandidateServiceImpl implements CandidateService {
 
 	/**
 	 * @author Naga Sreeram
-	 * {@summary : }
+	 * {@summary : When Admin's gives Criteria from dropdown this method provides Values of X and Y axis}
 	 */
 	@Override
 	public Map<String, Integer> getCandidateBySelectedWorkflowStatus(String inputDropdownCriteria) {
@@ -381,6 +381,28 @@ public class CandidateServiceImpl implements CandidateService {
 		}
 		
 		return storageForXandYaxisPlottingValues;
+	}
+	
+	/**
+	 * @author Naga Sreeram
+	 * {@summary : When Admin's clicks on a specific bar , he can view all the data of that specific bar}
+	 */
+	@Override
+	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
+		
+		List<Candidate> filteredCandidateDateFromInputStatuesCriteria = new ArrayList<>();
+		
+		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria =
+				candidateFeedbackRepository.findBystatus(inputStatusCriteria);
+		
+		List<String> filteringCanidateID = gettingCandidateIDusingCandidateStatusCriteria.stream().map(CandidateFeedback::getId).toList();
+		
+		for(int i=0; i<filteringCanidateID.size(); i++) {
+			Candidate candidateObject = candidateRepository.findById(filteringCanidateID.get(i)).get();
+			filteredCandidateDateFromInputStatuesCriteria.add(candidateObject);
+		}
+		
+		return filteredCandidateDateFromInputStatuesCriteria;
 	}
 	
 	@Override
@@ -401,6 +423,8 @@ public class CandidateServiceImpl implements CandidateService {
 
 		return null;
 	}
+
+
 
 
 
