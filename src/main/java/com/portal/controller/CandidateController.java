@@ -76,12 +76,6 @@ public class CandidateController {
 
 	private static final String DIGITS = "\\d+$";
 
-	/*
-	 * public CandidateController() {
-	 * 
-	 * }
-	 */
-
 	public CandidateController(CandidateService candidateService, AdminService adminService,InterviewerService interviewerService) {
 		this.candidateService = candidateService;
 		this.adminService = adminService;
@@ -130,11 +124,6 @@ public class CandidateController {
 		return createdCandidate;
 	}
 	
-	
-	
-	
-	
-	
 	@CrossOrigin(maxAge = 3600,origins = "*")
 	@Operation(summary = "This method is used to Create Candidate without file")
 	@PostMapping(value = "/candidate")
@@ -143,8 +132,6 @@ public class CandidateController {
 		log.debug("Cadidate With Details : " + candidate);
 		return createCandidateWithOutFile(candidate, token, externalUser);	
 	}
-	
-	
 
 	@Operation(summary = "This method is used to find duplicate email and phonenumber")
 	@PostMapping(value = "/candidate/{value}")
@@ -283,7 +270,11 @@ public class CandidateController {
 		return candidateService.getCandidateByRatings(rating);
 	}
 	
-	
+	@Operation( summary = "This methods will return a map : Key = X-axis fields & Value = Y-axis plotting data")
+	@GetMapping( value = "/getAllCandidateFeedBackValues/{inputDropdownCriteria}")
+	public Map<String, Integer> getCandidateBySelectedWorkflowStatus(@PathVariable("inputDropdownCriteria") String inputDropdownCriteria) {
+		return candidateService.getCandidateBySelectedWorkflowStatus(inputDropdownCriteria);
+	}
 	
 	
 	

@@ -77,9 +77,6 @@ public class CandidateServiceImpl implements CandidateService {
 
 	@Value("${resume.paths}")
 	private String path;
-	
-//	@Value("${otherResume.path}")
-//	private String otherResume;
 
 	@Autowired
 	private ApplicationConfigurations applicationConfigurations;
@@ -288,7 +285,7 @@ public class CandidateServiceImpl implements CandidateService {
 	public List<Candidate> getAllCandidateByJobId(String joId) throws Exception {
 
 		List<Candidate> candidateList = candidateRepository.findByJobId(joId) ;
-		
+
 		if(candidateList!=null) {
 			return candidateList;
 		}
@@ -297,7 +294,11 @@ public class CandidateServiceImpl implements CandidateService {
 
 
 
-
+	/**
+	 * @author Naga Sreeram
+	 * {@summary : Validating Skill set from job and throwing Resumes according to the SkillSet}
+	 * @exception Exception
+	 */
 	@Override
 	public String  updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception {
 
@@ -309,7 +310,7 @@ public class CandidateServiceImpl implements CandidateService {
 
 		String[] fileFrags = file.getOriginalFilename().split("\\.");
 		String resumeName = id + "." + fileFrags[fileFrags.length - 1];
-		
+
 		File sourceFile = new File(path);
 
 		for(int i=0; i<arrayList.size(); i++) {
@@ -321,7 +322,7 @@ public class CandidateServiceImpl implements CandidateService {
 					File destinationFolder = new File(destinationFolderPath);
 					System.out.println(destinationFolder.getAbsolutePath() +"   "+destinationFolder.getPath());
 					if (destinationFolder.exists() && destinationFolder.isDirectory()) {
-						
+
 						CandidateFeedback candidateFeedback = candidateFeedbackRepository.findById(id).orElse(new CandidateFeedback());
 						if(StringUtils.isNotEmpty(candidateFeedback.getStatus())&&!PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)
 								workflow.get(candidateFeedback.getStatus())).get("Allowed")).isEmpty()){	
@@ -347,12 +348,12 @@ public class CandidateServiceImpl implements CandidateService {
 				throw new Exception("Source file does not exist.");
 			}
 		}
-		
+
 		candidate.setResume(id+"."+fileFrags[fileFrags.length - 1]);
 		candidate.setJobId(jobId);
 		System.out.println("job id"+candidate.getId());
 		candidateRepository.save(candidate);
-		
+
 		return "operation comepleted";		
 
 	}
@@ -363,41 +364,62 @@ public class CandidateServiceImpl implements CandidateService {
 		return destinationFolderPath;
 	}
 
+	/**
+	 * @author Naga Sreeram
+	 * {@summary : }
+	 */
+	@Override
+	public Map<String, Integer> getCandidateBySelectedWorkflowStatus(String inputDropdownCriteria) {
+		
+		Map<String,Integer> storageForXandYaxisPlottingValues = new HashMap<>();
+				
+		String[] placeHondersForDashBoardsGraphsSplitInArray = inputDropdownCriteria.split(",");
+		
+		for(int i=0; i<placeHondersForDashBoardsGraphsSplitInArray.length; i++) {
+			List<CandidateFeedback> list = candidateFeedbackRepository.findBystatus(placeHondersForDashBoardsGraphsSplitInArray[i]);
+			storageForXandYaxisPlottingValues.put(placeHondersForDashBoardsGraphsSplitInArray[i],list.size());
+		}
+		
+		return storageForXandYaxisPlottingValues;
+	}
+	
 	@Override
 	public List<Candidate> getCandidateByRatings(String rating) {
-		
+
 		List<CandidateFeedback> candidateFeedbacksList=candidateFeedbackRepository.findAll();
-	
-			for(CandidateFeedback candidateFeedbackObject:candidateFeedbacksList) {
-				
-				Map<String,Object> feedbackRating =candidateFeedbackObject.getFeedBack();
-				//average calculations:
-				
-				//total of each performance
-				
-				
-				System.out.println(feedbackRating);
-			}
-		
+
+		for(CandidateFeedback candidateFeedbackObject:candidateFeedbacksList) {
+
+			Map<String,Object> feedbackRating =candidateFeedbackObject.getFeedBack();
+			//average calculations:
+
+			//total of each performance
+
+
+			System.out.println(feedbackRating);
+		}
+
 		return null;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

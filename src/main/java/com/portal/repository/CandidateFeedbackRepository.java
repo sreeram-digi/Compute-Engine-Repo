@@ -15,4 +15,7 @@ public interface CandidateFeedbackRepository extends MongoRepository<CandidateFe
 	
 	@Query(value = "{'status':{$in:?0}}", fields="{'_id':1}")
 	List<CandidateFeedback> findAllBystatus(Collection<String> status);
+	
+	List<CandidateFeedback> findBystatus(String criteria);
+	
 }

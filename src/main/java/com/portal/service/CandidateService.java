@@ -2,6 +2,7 @@ package com.portal.service;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -48,11 +49,10 @@ public interface CandidateService {
 	List<Candidate> getAllCandidateByJobId(String joId) throws Exception;
 	
 	String updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception;
-	
-	
+		
 	List<Candidate> getCandidateByRatings(String rating);
 	
-	
+	Map<String,Integer> getCandidateBySelectedWorkflowStatus(String inputDropdownCriteria);
 	
 	
 	
