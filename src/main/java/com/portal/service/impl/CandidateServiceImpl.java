@@ -363,4 +363,41 @@ public class CandidateServiceImpl implements CandidateService {
 		return destinationFolderPath;
 	}
 
+	@Override
+	public List<Candidate> getCandidateByRatings(String rating) {
+		
+		List<CandidateFeedback> candidateFeedbacksList=candidateFeedbackRepository.findAll();
+	
+			for(CandidateFeedback candidateFeedbackObject:candidateFeedbacksList) {
+				
+				Map<String,Object> feedbackRating =candidateFeedbackObject.getFeedBack();
+				//average calculations:
+				
+				//total of each performance
+				
+				
+				System.out.println(feedbackRating);
+			}
+		
+		return null;
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

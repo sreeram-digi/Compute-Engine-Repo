@@ -53,9 +53,6 @@ public class Candidate {
 	private String jobTitle;
 
 	@NotNull
-	private String applyingPostions;
-	
-	@NotNull
 	private double experience;
 
 	@NotNull

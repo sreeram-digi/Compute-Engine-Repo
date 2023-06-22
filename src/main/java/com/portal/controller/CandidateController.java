@@ -277,4 +277,23 @@ public class CandidateController {
 		return candidateService.getAllCandidateByJobId(jobId);
 	}
 	
+	@Operation(summary = "This method is used to get candidateList with jobId")
+	@GetMapping(value = "/candidateListWithRating/{rating}")
+	public List<Candidate> getCandidateByRatings(@PathVariable("rating") String rating){
+		return candidateService.getCandidateByRatings(rating);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

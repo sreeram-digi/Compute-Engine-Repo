@@ -47,6 +47,13 @@ public interface CandidateService {
 	
 	List<Candidate> getAllCandidateByJobId(String joId) throws Exception;
 	
-
 	String updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception;
+	
+	
+	List<Candidate> getCandidateByRatings(String rating);
+	
+	
+	
+	
+	
 }

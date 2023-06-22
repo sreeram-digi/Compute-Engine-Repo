@@ -50,7 +50,7 @@ public class Job {
     private boolean openForVendors;
 
     @NotNull
-    private boolean isInternal;
+    private boolean internal;
 
     @NotNull
     private String skillSet;
