@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -370,78 +371,87 @@ public class CandidateServiceImpl implements CandidateService {
 	 */
 	@Override
 	public Map<String, Integer> getCandidateBySelectedWorkflowStatus(String inputDropdownCriteria) {
-		
+
 		Map<String,Integer> storageForXandYaxisPlottingValues = new HashMap<>();
-				
+
 		String[] placeHondersForDashBoardsGraphsSplitInArray = inputDropdownCriteria.split(",");
-		
+
 		for(int i=0; i<placeHondersForDashBoardsGraphsSplitInArray.length; i++) {
 			List<CandidateFeedback> list = candidateFeedbackRepository.findBystatus(placeHondersForDashBoardsGraphsSplitInArray[i]);
 			storageForXandYaxisPlottingValues.put(placeHondersForDashBoardsGraphsSplitInArray[i],list.size());
 		}
-		
+
 		return storageForXandYaxisPlottingValues;
 	}
-	
+
 	/**
 	 * @author Naga Sreeram
 	 * {@summary : When Admin's clicks on a specific bar , he can view all the data of that specific bar}
 	 */
 	@Override
 	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
-		
+
 		List<Candidate> filteredCandidateDateFromInputStatuesCriteria = new ArrayList<>();
-		
+
 		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria =
 				candidateFeedbackRepository.findBystatus(inputStatusCriteria);
-		
+
 		List<String> filteringCanidateID = gettingCandidateIDusingCandidateStatusCriteria.stream().map(CandidateFeedback::getId).toList();
-		
+
 		for(int i=0; i<filteringCanidateID.size(); i++) {
 			Candidate candidateObject = candidateRepository.findById(filteringCanidateID.get(i)).get();
 			filteredCandidateDateFromInputStatuesCriteria.add(candidateObject);
 		}
-		
+
 		return filteredCandidateDateFromInputStatuesCriteria;
 	}
-	
+
 	@Override
-	public List<Candidate> getCandidateByRatings(String rating) {
+	public Map<String,Integer> getCandidateByRatings(String rating) {
+
+		List<String> groupOfRatingsInput= Arrays.asList(rating.split(","));
 
 		List<CandidateFeedback> candidateFeedbacksList=candidateFeedbackRepository.findAll();
 
-		for(CandidateFeedback candidateFeedbackObject:candidateFeedbacksList) {
+		List<Integer> listOfAverage= new ArrayList<>();
 
-			Map<String,Object> feedbackRating =candidateFeedbackObject.getFeedBack();
-			//average calculations:
+		Map<String,Integer> numberOfCandidatesWithRatings= new HashMap<>();
 
-			//total of each performance
+		List<Map<String,Object>> listOffeedbackRating	=candidateFeedbacksList.stream()
+				.map(CandidateFeedback::getFeedBack)
+				.filter(p->p !=null && !p.values().contains(null) )
+				.collect(Collectors.toList());
 
 
-			System.out.println(feedbackRating);
+		for(Map<String,Object> candidateFeedbackObject : listOffeedbackRating) {
+
+			List<Double> parsingDoubleObjectList= new ArrayList<>();
+			String feedback =candidateFeedbackObject.values().toString();	
+			for(String indivisualFeeback:feedback.split(", ")) {
+
+				indivisualFeeback=indivisualFeeback.replaceAll("[\\[\\],\\s]", "");
+				parsingDoubleObjectList.add(Double.parseDouble(indivisualFeeback));
+
+			}
+			OptionalDouble calculatedAverage=parsingDoubleObjectList.stream().mapToDouble(values->values).average();
+
+			listOfAverage.add((int)Math.round(calculatedAverage.getAsDouble()));
+
 		}
 
-		return null;
+		for(String indivisualRating:groupOfRatingsInput) {
+
+			if(listOfAverage.contains(Integer.parseInt(indivisualRating))) {
+
+				List<Integer> noumberOfCandidates=	listOfAverage.stream()
+						.filter(p->p.equals(Integer.parseInt(indivisualRating))).toList();	
+
+				numberOfCandidatesWithRatings.put(indivisualRating,noumberOfCandidates.size());
+			}
+		}
+
+		return numberOfCandidatesWithRatings;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

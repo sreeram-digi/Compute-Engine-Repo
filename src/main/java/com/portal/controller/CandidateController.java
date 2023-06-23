@@ -264,9 +264,9 @@ public class CandidateController {
 		return candidateService.getAllCandidateByJobId(jobId);
 	}
 	
-	@Operation(summary = "This method is used to get candidateList with jobId")
+	@Operation(summary = "This method is used to get number of candidates with rating")
 	@GetMapping(value = "/candidateListWithRating/{rating}")
-	public List<Candidate> getCandidateByRatings(@PathVariable("rating") String rating){
+	public Map<String,Integer> getCandidateByRatings(@PathVariable("rating") String rating){
 		return candidateService.getCandidateByRatings(rating);
 	}
 	

@@ -32,7 +32,7 @@ import org.springframework.web.method.HandlerMethod;
 version = "v1",
 description = "These are APIs for Recruitment Portal"),
 servers = @Server(url = "/"))
-@EnableScheduling
+//@EnableScheduling
 public class PortalApplication {
 	
 	public static void main(String[] args) {

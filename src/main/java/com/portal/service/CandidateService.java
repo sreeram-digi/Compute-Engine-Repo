@@ -50,7 +50,7 @@ public interface CandidateService {
 	
 	String updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception;
 		
-	List<Candidate> getCandidateByRatings(String rating);
+	Map<String,Integer> getCandidateByRatings(String rating);
 	
 	Map<String,Integer> getCandidateBySelectedWorkflowStatus(String inputDropdownCriteria);
 	
