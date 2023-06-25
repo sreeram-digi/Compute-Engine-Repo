@@ -1,5 +1,6 @@
 package com.portal.bean;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -57,5 +58,7 @@ public class Job {
     
     @NotNull
     private String workType;
+    
+    private LocalDateTime jobPostingDate;
 	
 }

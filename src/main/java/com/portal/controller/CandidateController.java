@@ -264,31 +264,4 @@ public class CandidateController {
 		return candidateService.getAllCandidateByJobId(jobId);
 	}
 	
-	@Operation(summary = "This method is used to get candidateList with jobId")
-	@GetMapping(value = "/candidateListWithRating/{rating}")
-	public List<Candidate> getCandidateByRatings(@PathVariable("rating") String rating){
-		return candidateService.getCandidateByRatings(rating);
-	}
-	
-	@Operation( summary = "This methods will return a map : Key = X-axis fields & Value = Y-axis plotting data")
-	@GetMapping( value = "/getAllCandidateFeedBackCriteria/{inputDropdownCriteria}")
-	public Map<String, Integer> getCandidateBySelectedWorkflowStatus(@PathVariable("inputDropdownCriteria") String inputDropdownCriteria) {
-		return candidateService.getCandidateBySelectedWorkflowStatus(inputDropdownCriteria);
-	}
-	
-	@GetMapping( value = "getAllCandidateInformationWithStatus/{inputStatusCriteria}" )
-	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(@PathVariable("inputStatusCriteria") String inputStatusCriteria) {
-		return candidateService.listOfCandidatesForSpecificSelectedWorkFLowStatus(inputStatusCriteria);
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }

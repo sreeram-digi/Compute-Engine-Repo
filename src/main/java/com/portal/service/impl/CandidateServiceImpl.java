@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import com.portal.ApplicationConstants;
 import com.portal.action.ActionConstants;
 import com.portal.bean.Candidate;
 import com.portal.bean.CandidateFeedback;
+import com.portal.bean.CandidateHistory;
 import com.portal.bean.Interviewer;
 import com.portal.bean.Job;
 import com.portal.bean.MembersForMeeting;
@@ -364,86 +366,6 @@ public class CandidateServiceImpl implements CandidateService {
 		return destinationFolderPath;
 	}
 
-	/**
-	 * @author Naga Sreeram
-	 * {@summary : When Admin's gives Criteria from dropdown this method provides Values of X and Y axis}
-	 */
-	@Override
-	public Map<String, Integer> getCandidateBySelectedWorkflowStatus(String inputDropdownCriteria) {
-		
-		Map<String,Integer> storageForXandYaxisPlottingValues = new HashMap<>();
-				
-		String[] placeHondersForDashBoardsGraphsSplitInArray = inputDropdownCriteria.split(",");
-		
-		for(int i=0; i<placeHondersForDashBoardsGraphsSplitInArray.length; i++) {
-			List<CandidateFeedback> list = candidateFeedbackRepository.findBystatus(placeHondersForDashBoardsGraphsSplitInArray[i]);
-			storageForXandYaxisPlottingValues.put(placeHondersForDashBoardsGraphsSplitInArray[i],list.size());
-		}
-		
-		return storageForXandYaxisPlottingValues;
-	}
+
 	
-	/**
-	 * @author Naga Sreeram
-	 * {@summary : When Admin's clicks on a specific bar , he can view all the data of that specific bar}
-	 */
-	@Override
-	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
-		
-		List<Candidate> filteredCandidateDateFromInputStatuesCriteria = new ArrayList<>();
-		
-		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria =
-				candidateFeedbackRepository.findBystatus(inputStatusCriteria);
-		
-		List<String> filteringCanidateID = gettingCandidateIDusingCandidateStatusCriteria.stream().map(CandidateFeedback::getId).toList();
-		
-		for(int i=0; i<filteringCanidateID.size(); i++) {
-			Candidate candidateObject = candidateRepository.findById(filteringCanidateID.get(i)).get();
-			filteredCandidateDateFromInputStatuesCriteria.add(candidateObject);
-		}
-		
-		return filteredCandidateDateFromInputStatuesCriteria;
-	}
-	
-	@Override
-	public List<Candidate> getCandidateByRatings(String rating) {
-
-		List<CandidateFeedback> candidateFeedbacksList=candidateFeedbackRepository.findAll();
-
-		for(CandidateFeedback candidateFeedbackObject:candidateFeedbacksList) {
-
-			Map<String,Object> feedbackRating =candidateFeedbackObject.getFeedBack();
-			//average calculations:
-
-			//total of each performance
-
-
-			System.out.println(feedbackRating);
-		}
-
-		return null;
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,36 +28,35 @@ public class JobServiceImpl implements JobService {
 	public JobServiceImpl(JobRepository jobRepository) {
 		this.jobRepository = jobRepository;
 	}
-	
+
 	@Value("${resume.paths}")
 	private String path;
-	
-//	@Value("${otherResume.path}")
-//	private String otherResume;
-	
+
 	@Override
 	public Job saveJob(Job job) {
 		log.debug("saveJob(): saving the Job : " + job);
-		
+
 		List<String> jobSkillSetArray =Arrays.asList(job.getSkillSet().split(","));
-		
+
 		String pathOfFiles=path;
-		
+
 		File fileObject = new File(pathOfFiles);
 		List<File> fileListPresent=Arrays.asList(fileObject.listFiles());
-		
+
 		List<String> fileNames=	fileListPresent.stream().map(File::getName).collect(Collectors.toList());
-		
+
 		for(String skillsObject:jobSkillSetArray) {
+
+			if(!fileNames.contains(skillsObject)) {
+				File newFile = new File(path+"/"+skillsObject);
+				if(!newFile.exists())
+					newFile.mkdir();
+				System.out.println("folder created");
+			}
+		}
 		
-		if(!fileNames.contains(skillsObject)) {
-			File newFile = new File(path+"/"+skillsObject);
-			if(!newFile.exists())
-			newFile.mkdir();
-			System.out.println("folder created");
-		}
-		}
-	
+		job.setJobPostingDate(LocalDateTime.now());
+		
 		return this.jobRepository.save(job);
 	}
 
@@ -77,7 +77,7 @@ public class JobServiceImpl implements JobService {
 	public Job updateJob(Job job) throws UserNotFoundException {
 		log.debug("updateJob(): updating the job : " + job);
 		jobRepository.findById(job.getId())
-				.orElseThrow(() -> new UserNotFoundException("job with Id " + job.getId() + " not found"));
+		.orElseThrow(() -> new UserNotFoundException("job with Id " + job.getId() + " not found"));
 		this.jobRepository.save(job);
 		return job;
 	}

@@ -2,10 +2,8 @@ package com.portal.repository;
 
 import java.util.Collection;
 import java.util.List;
-
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
-
 import com.portal.bean.CandidateFeedback;
 
 public interface CandidateFeedbackRepository extends MongoRepository<CandidateFeedback, String> {
@@ -17,5 +15,5 @@ public interface CandidateFeedbackRepository extends MongoRepository<CandidateFe
 	List<CandidateFeedback> findAllBystatus(Collection<String> status);
 	
 	List<CandidateFeedback> findBystatus(String criteria);
-	
+
 }

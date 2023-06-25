@@ -1,5 +1,6 @@
 package com.portal.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +44,9 @@ public class InterviewerServiceimpl implements InterviewerService {
 		log.debug("saveInterviewer(): saving the interviewer : " + interviewer);
 		/* Converting to lowercase */
 		interviewer.setInterviewerEmail(interviewer.getInterviewerEmail().toLowerCase());
+		
+		interviewer.setDateOfAssignedPosition(LocalDateTime.now());
+		
 		return this.interviewerRepository.save(interviewer);
 	}
 
