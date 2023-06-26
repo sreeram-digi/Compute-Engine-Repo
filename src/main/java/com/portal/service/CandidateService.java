@@ -2,6 +2,7 @@ package com.portal.service;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.portal.bean.Candidate;
+import com.portal.bean.CandidateFeedback;
+import com.portal.bean.FilterdData;
 import com.portal.bean.UpdateCandidatePayload;
 import com.portal.exception.UserNotFoundException;
 
@@ -51,6 +54,10 @@ public interface CandidateService {
 	
 	
 	List<Candidate> getCandidateByRatings(String rating);
+
+//	List<Candidate> findByJobTitel(String jobTitle);
+
+	Map<String, Integer> findByStatus( FilterdData filterData);
 	
 	
 	

@@ -35,6 +35,8 @@ import com.portal.ApplicationConstants;
 import com.portal.action.ActionConstants;
 import com.portal.bean.Candidate;
 import com.portal.bean.CandidateFeedback;
+import com.portal.bean.Criteria;
+import com.portal.bean.FilterdData;
 import com.portal.bean.Interviewer;
 import com.portal.bean.Job;
 import com.portal.bean.MembersForMeeting;
@@ -43,6 +45,7 @@ import com.portal.bean.WorkFlowBean;
 import com.portal.exception.UserNotFoundException;
 import com.portal.repository.CandidateFeedbackRepository;
 import com.portal.repository.CandidateRepository;
+import com.portal.repository.FeedBackRepository;
 import com.portal.repository.InterviewerRepository;
 import com.portal.repository.JobRepository;
 import com.portal.service.AdminService;
@@ -70,25 +73,24 @@ public class CandidateServiceImpl implements CandidateService {
 	@Autowired
 	private JobRepository jobRepository;
 
-
 	private EmailUtil emailUtil;
 	@Autowired
 	private JSONObject workflow;
 
 	@Value("${resume.paths}")
 	private String path;
-	
-//	@Value("${otherResume.path}")
-//	private String otherResume;
 
 	@Autowired
 	private ApplicationConfigurations applicationConfigurations;
+
 	public CandidateServiceImpl() {
 
 	}
 
 	public CandidateServiceImpl(CandidateRepository candidateRepository,
-			CandidateFeedbackRepository candidateFeedbackRepository, AdminService adminService, InterviewerRepository interviewerRepository, EmailUtil emailUtil, @Qualifier("workflow") JSONObject workflow) {
+			CandidateFeedbackRepository candidateFeedbackRepository, AdminService adminService,
+			InterviewerRepository interviewerRepository, EmailUtil emailUtil,
+			@Qualifier("workflow") JSONObject workflow) {
 		this.candidateRepository = candidateRepository;
 		this.candidateFeedbackRepository = candidateFeedbackRepository;
 		this.adminService = adminService;
@@ -97,23 +99,23 @@ public class CandidateServiceImpl implements CandidateService {
 		this.workflow = workflow;
 	}
 
-
 	public CandidateServiceImpl(CandidateRepository candidateRepository2,
-			CandidateFeedbackRepository candidateFeedbackRepository2, AdminService
-			adminService2, InterviewerRepository interviewerRepository2, EmailUtil
-			emailUtil2) { 
+			CandidateFeedbackRepository candidateFeedbackRepository2, AdminService adminService2,
+			InterviewerRepository interviewerRepository2, EmailUtil emailUtil2) {
 		this.candidateRepository = candidateRepository2;
 		this.candidateFeedbackRepository = candidateFeedbackRepository2;
-		this.adminService = adminService2; 
-		this.interviewerRepository = interviewerRepository2; 
-		this.emailUtil = emailUtil2; 
+		this.adminService = adminService2;
+		this.interviewerRepository = interviewerRepository2;
+		this.emailUtil = emailUtil2;
 	}
 
 	@Override
 	public Candidate createCandidate(Candidate candidate) throws Exception {
 		candidate.setLastModifiedDate(LocalDateTime.now());
-		candidate.setPointOfContact( ((List<Interviewer>) interviewerRepository.findAllById(candidate.getPointOfContactIds())).stream().filter(x->x.isAdmin()).collect(Collectors.toList()));
-		if(candidate.getPointOfContact() == null || candidate.getPointOfContact().size() == 0) {
+		candidate.setPointOfContact(
+				((List<Interviewer>) interviewerRepository.findAllById(candidate.getPointOfContactIds())).stream()
+						.filter(x -> x.isAdmin()).collect(Collectors.toList()));
+		if (candidate.getPointOfContact() == null || candidate.getPointOfContact().size() == 0) {
 			throw new Exception("Point of contact should be only admins");
 		}
 		candidate.setUploadedDate(LocalDateTime.now());
@@ -121,23 +123,23 @@ public class CandidateServiceImpl implements CandidateService {
 	}
 
 	@Override
-	public Page<Candidate> getAllCandidatesWithPagination(int pageNumber, int limit, String token) {	
+	public Page<Candidate> getAllCandidatesWithPagination(int pageNumber, int limit, String token) {
 
-		Pageable pageable = PageRequest.of(pageNumber-1, limit);
+		Pageable pageable = PageRequest.of(pageNumber - 1, limit);
 		JSONObject jsonObject = decodeUserToken(token);
 		String userId = jsonObject.getString("userId");
 		String type = jsonObject.getString("type");
-		if(type.equalsIgnoreCase("externalUser")) {
+		if (type.equalsIgnoreCase("externalUser")) {
 			return candidateRepository.findAllByUploadedByWithPagination(userId, pageable);
 		}
 		return candidateRepository.findAllWithPagination(pageable);
 	}
 
-	public List<Candidate> getAllCandidates(String token){
+	public List<Candidate> getAllCandidates(String token) {
 		JSONObject jsonObject = decodeUserToken(token);
 		String userId = jsonObject.getString("userId");
 		String type = jsonObject.getString("type");
-		if(type.equalsIgnoreCase("externalUser")) {
+		if (type.equalsIgnoreCase("externalUser")) {
 			return candidateRepository.findAllUploadedBy(userId);
 
 		}
@@ -155,9 +157,11 @@ public class CandidateServiceImpl implements CandidateService {
 				.orElseThrow(() -> new UserNotFoundException("User with Id " + id + " not found"));
 
 		CandidateFeedback candidateFeedback = candidateFeedbackRepository.findById(id).orElse(new CandidateFeedback());
-		if(StringUtils.isNotEmpty(candidateFeedback.getStatus())&&!PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)workflow.get(candidateFeedback.getStatus())).get("Allowed")).isEmpty())
-		{			
-			candidateFeedback.setNextSteps(PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)workflow.get(candidateFeedback.getStatus())).get("Allowed")));
+		if (StringUtils.isNotEmpty(candidateFeedback.getStatus()) && !PortalUtils
+				.jsonArrayToList((JSONArray) ((JSONObject) workflow.get(candidateFeedback.getStatus())).get("Allowed"))
+				.isEmpty()) {
+			candidateFeedback.setNextSteps(PortalUtils.jsonArrayToList(
+					(JSONArray) ((JSONObject) workflow.get(candidateFeedback.getStatus())).get("Allowed")));
 		}
 		candidate.setCandidateFeedback(candidateFeedback);
 		return candidate;
@@ -165,49 +169,52 @@ public class CandidateServiceImpl implements CandidateService {
 
 	@Override
 	public Candidate updateCandidateById(UpdateCandidatePayload updateCandidatePayload) throws Exception {
-		Candidate candidate = candidateRepository.findById(updateCandidatePayload.getId())
-				.orElseThrow(() -> new UserNotFoundException("User with Id " + updateCandidatePayload.getId() + " not found"));
-		if(updateCandidatePayload.getFirstName()!= null)
+		Candidate candidate = candidateRepository.findById(updateCandidatePayload.getId()).orElseThrow(
+				() -> new UserNotFoundException("User with Id " + updateCandidatePayload.getId() + " not found"));
+		if (updateCandidatePayload.getFirstName() != null)
 			candidate.setFirstName(updateCandidatePayload.getFirstName());
-		if(updateCandidatePayload.getLastName()!=null)
+		if (updateCandidatePayload.getLastName() != null)
 			candidate.setLastName(updateCandidatePayload.getLastName());
-		if(updateCandidatePayload.getPhoneNumber()!=null)
+		if (updateCandidatePayload.getPhoneNumber() != null)
 			candidate.setPhoneNumber(updateCandidatePayload.getPhoneNumber());
-		if(updateCandidatePayload.getEmail()!=null)
+		if (updateCandidatePayload.getEmail() != null)
 			candidate.setEmail(updateCandidatePayload.getEmail());
-		if(updateCandidatePayload.getSkills()!=null)
+		if (updateCandidatePayload.getSkills() != null)
 			candidate.setSkills(updateCandidatePayload.getSkills());
-		if(updateCandidatePayload.getJobDescription()!=null)
+		if (updateCandidatePayload.getJobDescription() != null)
 			candidate.setJobDescription(updateCandidatePayload.getJobDescription());
-		if(updateCandidatePayload.getJobTitle()!=null)
+		if (updateCandidatePayload.getJobTitle() != null)
 			candidate.setJobTitle(updateCandidatePayload.getJobTitle());
-		if(updateCandidatePayload.getExperience()>0)
+		if (updateCandidatePayload.getExperience() > 0)
 			candidate.setExperience(updateCandidatePayload.getExperience());
-		if(updateCandidatePayload.getRelavantExperience()>0)
+		if (updateCandidatePayload.getRelavantExperience() > 0)
 			candidate.setRelavantExperience(updateCandidatePayload.getRelavantExperience());
-		if(updateCandidatePayload.getSelectorId()!=null) {
+		if (updateCandidatePayload.getSelectorId() != null) {
 			candidate.setSelectorId(updateCandidatePayload.getSelectorId());
-			Optional<CandidateFeedback> optionalFeedBack = candidateFeedbackRepository.findById(updateCandidatePayload.getId());
-			Interviewer interviewer = interviewerRepository.findById(updateCandidatePayload.getSelectorId()).orElseThrow(()->new Exception());
-			if(optionalFeedBack.isPresent()) {
+			Optional<CandidateFeedback> optionalFeedBack = candidateFeedbackRepository
+					.findById(updateCandidatePayload.getId());
+			Interviewer interviewer = interviewerRepository.findById(updateCandidatePayload.getSelectorId())
+					.orElseThrow(() -> new Exception());
+			if (optionalFeedBack.isPresent()) {
 				CandidateFeedback canFeedBack = optionalFeedBack.get();
 				canFeedBack.setInterviewerName(interviewer.getInterviewerName());
 				canFeedBack.setCurrentInterviewId(updateCandidatePayload.getSelectorId());
 				candidateFeedbackRepository.save(canFeedBack);
 			}
 		}
-		if(updateCandidatePayload.getUpLoadedBy()!=null)
+		if (updateCandidatePayload.getUpLoadedBy() != null)
 			candidate.setUpLoadedBy(updateCandidatePayload.getUpLoadedBy());
 		candidate.setLastModifiedDate(LocalDateTime.now());
-		if(candidateFeedbackRepository.findById(updateCandidatePayload.getId())==null 
+		if (candidateFeedbackRepository.findById(updateCandidatePayload.getId()) == null
 				&& StringUtils.isNoneBlank(updateCandidatePayload.getSelectorId())) {
 			WorkFlowBean workflow = new WorkFlowBean();
 			Map<String, Object> valueMap = new HashMap<>();
 			valueMap.put(ActionConstants.CANDIDATE_ID, updateCandidatePayload.getId());
 			valueMap.put(ActionConstants.SELECTOR_ID, candidate.getSelectorId());
 			workflow.setValueMap(valueMap);
-			adminService.callWorkFlow(workflow, true,null);
-			CandidateFeedback canfeedBack = candidateFeedbackRepository.findById(updateCandidatePayload.getId()).orElseThrow(()->new Exception("Candidate history not found"));
+			adminService.callWorkFlow(workflow, true, null);
+			CandidateFeedback canfeedBack = candidateFeedbackRepository.findById(updateCandidatePayload.getId())
+					.orElseThrow(() -> new Exception("Candidate history not found"));
 			candidate.setCandidateFeedback(canfeedBack);
 		}
 		this.candidateRepository.save(candidate);
@@ -247,8 +254,9 @@ public class CandidateServiceImpl implements CandidateService {
 
 	@Override
 	public void updateCandidateResume(String id, String type) throws UserNotFoundException {
-		Candidate candidate = candidateRepository.findById(id).orElseThrow(()-> new UserNotFoundException("Candidate not found"));
-		candidate.setResume(id+"."+type);
+		Candidate candidate = candidateRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("Candidate not found"));
+		candidate.setResume(id + "." + type);
 		candidateRepository.save(candidate);
 
 	}
@@ -256,19 +264,20 @@ public class CandidateServiceImpl implements CandidateService {
 	@Override
 	public void sendNotificationToAssignSelector(JSONObject jsonObject, @Valid Candidate candidate) {
 
-		List<MembersForMeeting> emailNotificationList =new ArrayList<>();
+		List<MembersForMeeting> emailNotificationList = new ArrayList<>();
 		MembersForMeeting candidateMember = new MembersForMeeting();
 		candidateMember.setEmail(applicationConfigurations.getAdminNotificationEmail());
 		emailNotificationList.add(candidateMember);
 
-		String subject = emailUtil.constructEmailSubject(ApplicationConstants.ASSIGN_SELECTOR, candidate.getFirstName()+" "+candidate.getLastName());
+		String subject = emailUtil.constructEmailSubject(ApplicationConstants.ASSIGN_SELECTOR,
+				candidate.getFirstName() + " " + candidate.getLastName());
 
-		String emailbody = emailUtil.constructEmailBody(ApplicationConstants.ASSIGN_SELECTOR, 
-				candidate.getFirstName()+" "+candidate.getLastName(),
-				Optional.ofNullable(jsonObject.getString("userName")).orElse("") ,
-				applicationConfigurations.getPortalURL()+"/viewcandidate/"+candidate.getId());
+		String emailbody = emailUtil.constructEmailBody(ApplicationConstants.ASSIGN_SELECTOR,
+				candidate.getFirstName() + " " + candidate.getLastName(),
+				Optional.ofNullable(jsonObject.getString("userName")).orElse(""),
+				applicationConfigurations.getPortalURL() + "/viewcandidate/" + candidate.getId());
 
-		adminService.sendNotification(subject,emailbody,emailNotificationList);
+		adminService.sendNotification(subject, emailbody, emailNotificationList);
 	}
 
 	@Override
@@ -279,125 +288,177 @@ public class CandidateServiceImpl implements CandidateService {
 	@Override
 	public List<Candidate> getAllCandidatesExcel(String startDate, String endDate) throws ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date start=sdf.parse(startDate); 
-		Date end=sdf.parse(endDate); 
+		Date start = sdf.parse(startDate);
+		Date end = sdf.parse(endDate);
 		return candidateRepository.getAllBetweenDates(start, end);
 	}
 
 	@Override
 	public List<Candidate> getAllCandidateByJobId(String joId) throws Exception {
 
-		List<Candidate> candidateList = candidateRepository.findByJobId(joId) ;
-		
-		if(candidateList!=null) {
+		List<Candidate> candidateList = candidateRepository.findByJobId(joId);
+
+		if (candidateList != null) {
 			return candidateList;
 		}
 		return candidateList;
 	}
 
-
-
-
 	@Override
-	public String  updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception {
+	public String updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception {
 
-		Candidate candidate = candidateRepository.findById(id).orElseThrow(()-> new UserNotFoundException("Candidate not found"));
-		Job adminJobDescription = jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job id not found"));
+		Candidate candidate = candidateRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("Candidate not found"));
+		Job adminJobDescription = jobRepository.findById(jobId).orElseThrow(() -> new Exception("Job id not found"));
 
 		List<String> arrayList = Arrays.asList(adminJobDescription.getSkillSet().split(","));
-		String candidateSkillSet = candidate.getSkills();
+		candidate.getSkills();
 
 		String[] fileFrags = file.getOriginalFilename().split("\\.");
 		String resumeName = id + "." + fileFrags[fileFrags.length - 1];
-		
+
 		File sourceFile = new File(path);
 
-		for(int i=0; i<arrayList.size(); i++) {
+		for (int i = 0; i < arrayList.size(); i++) {
 
 			if (sourceFile.exists()) {
 				String destinationFolderPath = getDestinationFolderPath(arrayList.get(i));
 
 				if (destinationFolderPath != null) {
 					File destinationFolder = new File(destinationFolderPath);
-					System.out.println(destinationFolder.getAbsolutePath() +"   "+destinationFolder.getPath());
+					System.out.println(destinationFolder.getAbsolutePath() + "   " + destinationFolder.getPath());
 					if (destinationFolder.exists() && destinationFolder.isDirectory()) {
-						
-						CandidateFeedback candidateFeedback = candidateFeedbackRepository.findById(id).orElse(new CandidateFeedback());
-						if(StringUtils.isNotEmpty(candidateFeedback.getStatus())&&!PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)
-								workflow.get(candidateFeedback.getStatus())).get("Allowed")).isEmpty()){	
-							candidateFeedback.setNextSteps(PortalUtils.jsonArrayToList((JSONArray) ((JSONObject)workflow.get(candidateFeedback.getStatus())).get("Allowed")));
+
+						CandidateFeedback candidateFeedback = candidateFeedbackRepository.findById(id)
+								.orElse(new CandidateFeedback());
+						if (StringUtils.isNotEmpty(candidateFeedback.getStatus()) && !PortalUtils.jsonArrayToList(
+								(JSONArray) ((JSONObject) workflow.get(candidateFeedback.getStatus())).get("Allowed"))
+								.isEmpty()) {
+							candidateFeedback.setNextSteps(PortalUtils.jsonArrayToList(
+									(JSONArray) ((JSONObject) workflow.get(candidateFeedback.getStatus()))
+											.get("Allowed")));
 						}
 						candidate.setCandidateFeedback(candidateFeedback);
 
-						if(Files.exists(Paths.get(path + "/" + candidate.getResume())))
+						if (Files.exists(Paths.get(path + "/" + candidate.getResume())))
 							Files.deleteIfExists(Paths.get(path + "/" + candidate.getResume()));
 						Path root = Paths.get(destinationFolderPath);
 						Files.copy(file.getInputStream(), root.resolve(resumeName));
 
-					}
-					else {
+					} else {
 						throw new Exception("Destination folder does not exist.");
 					}
-				} 
-				else {
+				} else {
 					throw new Exception("Invalid dropdown value.");
 				}
-			} 
-			else {
+			} else {
 				throw new Exception("Source file does not exist.");
 			}
 		}
-		
-		candidate.setResume(id+"."+fileFrags[fileFrags.length - 1]);
+
+		candidate.setResume(id + "." + fileFrags[fileFrags.length - 1]);
 		candidate.setJobId(jobId);
-		System.out.println("job id"+candidate.getId());
+		System.out.println("job id" + candidate.getId());
 		candidateRepository.save(candidate);
-		
-		return "operation comepleted";		
+
+		return "operation comepleted";
 
 	}
 
 	private String getDestinationFolderPath(String folderPath) {
 		String destinationFolderPath = null;
-		destinationFolderPath = path+"/"+folderPath;
+		destinationFolderPath = path + "/" + folderPath;
 		return destinationFolderPath;
 	}
 
 	@Override
 	public List<Candidate> getCandidateByRatings(String rating) {
-		
-		List<CandidateFeedback> candidateFeedbacksList=candidateFeedbackRepository.findAll();
-	
-			for(CandidateFeedback candidateFeedbackObject:candidateFeedbacksList) {
-				
-				Map<String,Object> feedbackRating =candidateFeedbackObject.getFeedBack();
-				//average calculations:
-				
-				//total of each performance
-				
-				
-				System.out.println(feedbackRating);
-			}
-		
+
+		List<CandidateFeedback> candidateFeedbacksList = candidateFeedbackRepository.findAll();
+
+		for (CandidateFeedback candidateFeedbackObject : candidateFeedbacksList) {
+
+			Map<String, Object> feedbackRating = candidateFeedbackObject.getFeedBack();
+
+		}
+
 		return null;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	@Override
+
+	public Map<String, Integer> findByStatus(FilterdData filterdData) {
+
+		List<Candidate> allFilteredCandidate = candidateRepository.findAll().stream().filter(candidate -> {
+
+			if (filterdData.getJobTitle() != null && !filterdData.getJobTitle().isEmpty()) {
+
+				return candidate.getJobTitle().equalsIgnoreCase(filterdData.getJobTitle());
+
+			}
+
+			return true;
+
+		}).filter(candidate -> {
+
+			if (filterdData.getSkills() != null && !filterdData.getSkills().isEmpty()) {
+
+				return candidate.getSkills().equalsIgnoreCase(filterdData.getSkills());
+
+			}
+
+			return true;
+
+		})
+
+				.collect(Collectors.toList());
+
+		Map<String, Integer> fieldNameCounts = new HashMap<>();
+
+		for (Candidate candidate : allFilteredCandidate) {
+
+			if (candidate.getJobTitle().equalsIgnoreCase(filterdData.getJobTitle())) {
+
+				String fieldName = candidate.getJobTitle();
+
+				String candidateId = String.valueOf(candidate.getId());
+
+				boolean hasMatchingFeedback = candidateFeedbackRepository.findAll().stream()
+
+						.anyMatch(feedback -> String.valueOf(feedback.getId()).equals(candidateId)
+
+								&& feedback.getStatus().equals(filterdData.getStatus()));
+
+				if (hasMatchingFeedback) {
+
+					fieldNameCounts.put(fieldName, fieldNameCounts.getOrDefault(fieldName, 0) + 1);
+
+				}
+
+			} else if (candidate.getSkills().equalsIgnoreCase(filterdData.getSkills())) {
+
+				String fieldName = candidate.getSkills(); // Replace with the actual field name from your Candidate
+
+				String candidateId = String.valueOf(candidate.getId());
+
+				boolean hasMatchingFeedback = candidateFeedbackRepository.findAll().stream()
+
+						.anyMatch(feedback -> String.valueOf(feedback.getId()).equals(candidateId)
+
+								&& feedback.getStatus().equals(filterdData.getStatus()));
+
+				if (hasMatchingFeedback) {
+
+					fieldNameCounts.put(fieldName, fieldNameCounts.getOrDefault(fieldName, 0) + 1);
+
+				}
+
+			}
+
+		}
+
+		return fieldNameCounts;
+
+	}
+
 }
