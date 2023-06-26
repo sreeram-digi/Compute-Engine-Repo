@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.portal.bean.Candidate;
+import com.portal.bean.Interviewer;
 import com.portal.service.GraphsDashBoardService;
 import com.portal.service.impl.GraphsDashBoardServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,10 +57,16 @@ public class GraphsDashBoardController {
 		return graphsDashBoardService.listOfCandidatesForSpecificSelectedWorkFLowStatus(inputStatusCriteria);
 	}
 	
-	@Operation(summary = " This method is used to get interviewer by position")
+	@Operation(summary = " This method is used to get count interviewer by position")
     @GetMapping("/getInterviewerByPosition/{position}")
     public Map<String, Integer> getCount(@PathVariable("position") String position){
         return graphsDashBoardService.getCount(position);
     }
+	
+	@Operation(summary = " This method is used to get list of interviewers by position")
+    @GetMapping("/getListOfData/{position}")
+	public List<Interviewer> getListOfData(@PathVariable("position") String position){
+		return graphsDashBoardService.getListOfData(position);
+	}
 	
 }

@@ -3,6 +3,7 @@ package com.portal.service;
 import java.util.List;
 import java.util.Map;
 import com.portal.bean.Candidate;
+import com.portal.bean.Interviewer;
 
 public interface GraphsDashBoardService {
 
@@ -18,5 +19,7 @@ public interface GraphsDashBoardService {
 	List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria);
 	
 	Map<String, Integer> getCount(String position);
+
+	public List<Interviewer> getListOfData(String position);
 	
 }
