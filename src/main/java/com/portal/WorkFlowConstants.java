@@ -12,4 +12,6 @@ public class WorkFlowConstants {
 	
 	public static final String inputCriteria="1,2,3,4,5";
 	
+	public static final String inputSelection = "HR,SELECTOR";
+	
 }

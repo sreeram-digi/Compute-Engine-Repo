@@ -16,6 +16,7 @@ import com.portal.WorkFlowConstants;
 import com.portal.bean.Candidate;
 import com.portal.bean.CandidateFeedback;
 import com.portal.bean.CandidateHistory;
+import com.portal.bean.Interviewer;
 import com.portal.repository.CandidateFeedbackRepository;
 import com.portal.repository.CandidateRepository;
 import com.portal.repository.InterviewerRepository;
@@ -48,13 +49,20 @@ public class DashBoardFilteringsByRangeOfDates {
 		switch(dateFromDropDown) {
 		case("Weekly"):
 			date = 1;
+			break;
 		case("Monthly"):
 			date = 4;
+			break;
 		case("Quarterly"):
 			date = 13;
+		break;
 		case("Half-Yearly"):
 			date = 26;
+		break;
 		case("Yearly"):
+			date = 52;
+		break;
+		default :
 			date = 52;
 		}
 
@@ -80,7 +88,10 @@ public class DashBoardFilteringsByRangeOfDates {
 
 		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectRevathi = new HashMap<>();
 
-
+		addXYaxisMapAndHouringListObjectRevathi.put(getHrAndSelectorByDateRange(WorkFlowConstants.inputSelection,date), 
+				getListOfHrAndSelectorData(WorkFlowConstants.inputSelection));
+		
+		finalMap.put("Count OF HR's and Selectors", addXYaxisMapAndHouringListObjectRevathi);
 		/* Job Information */
 
 		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectSaurabh = new HashMap<>();
@@ -90,8 +101,10 @@ public class DashBoardFilteringsByRangeOfDates {
 
 	}
 
-	public Map<String,Integer> getCandidateWorkflowByDateRange(String inputDropdownCriteria , long inputDateRange){
+	
 
+	public Map<String,Integer> getCandidateWorkflowByDateRange(String inputDropdownCriteria , long inputDateRange){
+		
 		List<CandidateFeedback> filteredCandidateDataUponGivenRangeDates = new ArrayList<>();
 		Map<String,Integer> storageForXandYaxisPlottingValues = new HashMap<>();
 		String[] placeHoldersForDashBoardsGraphsSplitInArray = inputDropdownCriteria.split(",");
@@ -157,7 +170,7 @@ public class DashBoardFilteringsByRangeOfDates {
 	}
 
 	public Map<String,Integer> getCandidatesByRatingFilteredByDateRange(String inputDropdownCriteria , long inputDateRange){
-
+		
 		List<CandidateFeedback> candidateFeedbacksList=candidateFeedbackRepository.findAll();
 
 		List<CandidateFeedback> listOfFilteredCandidate= new ArrayList<>();    
@@ -231,6 +244,55 @@ public class DashBoardFilteringsByRangeOfDates {
 
 		return returningCandidateList;
 
+	}
+	
+	public Map<String, Integer> getHrAndSelectorByDateRange(String inputDropdownCriteria , long inputDateRange) {
+
+		List<Interviewer> interviewersList = interviewerRepository.findAll();
+		LocalDate startingDate =LocalDate.now().minusWeeks(inputDateRange);
+		LocalDate endDate = LocalDate.now();
+
+		String[] placeHondersForDashBoardsGraphsSplitInArray = inputDropdownCriteria.split(",");
+		Map<String, Integer> positionsMap = new HashMap();
+
+		for(String str : placeHondersForDashBoardsGraphsSplitInArray ) {
+
+			if(str.equalsIgnoreCase("HR")) {
+
+				List<Interviewer> countHR = interviewersList.stream().filter(x->x.isHr())
+						.filter(interviewer->interviewer.getDateOfAssignedPosition().toLocalDate().isAfter(startingDate)
+								&& interviewer.getDateOfAssignedPosition().toLocalDate().isBefore(endDate)).collect(Collectors.toList());
+				positionsMap.put(str, countHR.size());
+			}
+			if(str.equalsIgnoreCase("SELECTOR")) {
+
+				List<Interviewer> countSelector = interviewersList.stream().filter(x->x.isSelector())
+						.filter(interviewer->interviewer.getDateOfAssignedPosition().toLocalDate().isAfter(startingDate)
+								&& interviewer.getDateOfAssignedPosition().toLocalDate().isBefore(endDate)).collect(Collectors.toList());
+				positionsMap.put(str, countSelector.size());
+			}    
+		}
+		return positionsMap;
+	}
+	
+	private List<Interviewer> getListOfHrAndSelectorData(String inputselection) {
+		
+		String[] placeHondersForDashBoardsGraphsSplitInArray = inputselection.split(",");
+		List<Interviewer> interviewersList = interviewerRepository.findAll();
+		
+		List<Interviewer> newInterviewers = new ArrayList<>();
+
+		for(String str : placeHondersForDashBoardsGraphsSplitInArray ) {
+			if(str.equalsIgnoreCase("HR")) {
+				List<Interviewer> listHr = interviewersList.stream().filter(x->x.isHr()).collect(Collectors.toList());
+				newInterviewers.addAll(listHr);
+			}
+			if(str.equalsIgnoreCase("SELECTOR")) {
+				List<Interviewer> listSelector = interviewersList.stream().filter(x->x.isSelector()).collect(Collectors.toList());
+				newInterviewers.addAll(listSelector);
+			}    
+		}
+		return newInterviewers;
 	}
 
 }
