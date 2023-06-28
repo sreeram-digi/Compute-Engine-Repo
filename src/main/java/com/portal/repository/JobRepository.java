@@ -8,5 +8,9 @@ import com.portal.bean.Job;
 @Repository
 public interface JobRepository extends MongoRepository<Job, String> {
 
+	Job findByLocation(String string);
+
+	Job findBySkillSet(String skill);
+
 
 }

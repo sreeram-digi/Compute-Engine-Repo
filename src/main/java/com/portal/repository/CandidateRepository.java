@@ -37,5 +37,7 @@ public interface CandidateRepository extends MongoRepository<Candidate, String> 
 	List<Candidate> getAllBetweenDates(Date startDate, Date endDate);
 	
 	List<Candidate> findByJobId(String jobId);
+	
+	List<Candidate> findByJobTitle(String jobtitle);
 }
 

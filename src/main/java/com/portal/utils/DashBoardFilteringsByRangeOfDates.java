@@ -42,49 +42,53 @@ public class DashBoardFilteringsByRangeOfDates {
 		Map<String,Map<Map<String,Integer>,List<?>>> finalMap = new HashMap<>();
 
 		
-
 		long date = 0;
 
 		switch(dateFromDropDown) {
 		case("Weekly"):
 			date = 1;
+			break;
 		case("Monthly"):
 			date = 4;
+			break;
 		case("Quarterly"):
 			date = 13;
+			break;
 		case("Half-Yearly"):
 			date = 26;
+			break;
 		case("Yearly"):
+			date = 52;
+			break;
+		default:
 			date = 52;
 		}
 
 		/* Candidate WorkFlow */
 
-		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectSreeram = new HashMap<>();
+		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectWorkflow = new HashMap<>();
 		
-		addXYaxisMapAndHouringListObjectSreeram.put(getCandidateWorkflowByDateRange(WorkFlowConstants.workFlowConstants, date),
+		addXYaxisMapAndHouringListObjectWorkflow.put(getCandidateWorkflowByDateRange(WorkFlowConstants.workFlowConstants, date),
 				listOfCandidatesForSpecificSelectedWorkFLowStatusByDateRange(WorkFlowConstants.workFlowConstants));
 
-		finalMap.put("WorkFlow",addXYaxisMapAndHouringListObjectSreeram);
+		finalMap.put("WorkFlow",addXYaxisMapAndHouringListObjectWorkflow);
 
 		/* Candidate Rating */
 		
-		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectPreeti = new HashMap<>();
+		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectCandidateRating = new HashMap<>();
 
-		addXYaxisMapAndHouringListObjectPreeti.put(getCandidatesByRatingFilteredByDateRange(WorkFlowConstants.inputCriteria,
+		addXYaxisMapAndHouringListObjectCandidateRating.put(getCandidatesByRatingFilteredByDateRange(WorkFlowConstants.inputCriteria,
 				date), listOfCandidatesForSpecificRatingFilteredByDateRange(WorkFlowConstants.inputCriteria));
 		
-		finalMap.put("Ratings",addXYaxisMapAndHouringListObjectPreeti);
+		finalMap.put("Ratings",addXYaxisMapAndHouringListObjectCandidateRating);
 
 		/* Interviewer Information */
 
-		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectRevathi = new HashMap<>();
+		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectInterviewerRating = new HashMap<>();
 
 
 		/* Job Information */
-
-		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectSaurabh = new HashMap<>();
-
+		
 
 		return finalMap;
 
