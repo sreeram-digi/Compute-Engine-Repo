@@ -454,7 +454,6 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 		}
 		return positionsMap;
 	}
-
 	
 	/**
 	 * @author Revathi Muddani
@@ -587,6 +586,26 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 			}
 		}
 		return candidatesAction;
+
+	@Override
+	public List<Interviewer> getListOfData(String position) {
+		String[] placeHondersForDashBoardsGraphsSplitInArray = position.split(",");
+		List<Interviewer> interviewersList = interviewerRepository.findAll();
+		
+		List<Interviewer> newInterviewers = new ArrayList<>();
+
+		for(String str : placeHondersForDashBoardsGraphsSplitInArray ) {
+			if(str.equalsIgnoreCase("HR")) {
+				List<Interviewer> listHr = interviewersList.stream().filter(x->x.isHr()).collect(Collectors.toList());
+				newInterviewers.addAll(listHr);
+			}
+			if(str.equalsIgnoreCase("SELECTOR")) {
+				List<Interviewer> listSelector = interviewersList.stream().filter(x->x.isSelector()).collect(Collectors.toList());
+				newInterviewers.addAll(listSelector);
+			}    
+		}
+		return newInterviewers;
+
 	}
 
 }

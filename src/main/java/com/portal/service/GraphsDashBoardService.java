@@ -3,6 +3,7 @@ package com.portal.service;
 import java.util.List;
 import java.util.Map;
 import com.portal.bean.Candidate;
+import com.portal.bean.Interviewer;
 
 public interface GraphsDashBoardService {
 
@@ -35,6 +36,11 @@ public interface GraphsDashBoardService {
 
 	Map<String, Map<String, Integer>> getCandidatesCountAccordingToStatus(String action, String skills);
 
-	List<Candidate> getCandidatesListAccordingToStatus(String action, String skills);
+	List<Candidate> getCandidatesListAccordingToStatus(String action, String skills
+	
+	Map<String, Integer> getCount(String position);
+
+	List<Interviewer> getListOfData(String position);
+	
 }
 

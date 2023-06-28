@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.portal.bean.Candidate;
+import com.portal.bean.Interviewer;
 import com.portal.service.GraphsDashBoardService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,7 +69,7 @@ public class GraphsDashBoardController {
 	public List<String> getAllJobTitlesForDropDown(){
 		return graphsDashBoardService.getAllJobTitlesForDropDown();
 	}
-	
+
 	@Operation(summary = " This method is used to get information about job title")
 	@GetMapping("/getDataForJobTitleAgainstStatus/{inputJobTiltles}/{status}")
 	public Map<String,Map<String,Integer>> getDataForJobTitleAgainstStatus(@PathVariable("inputJobTiltles") String inputJobTiltles, 
@@ -119,4 +120,18 @@ public class GraphsDashBoardController {
     public List<Candidate> getCandidatesListAccordingToStatus(@PathVariable("action") String action, @PathVariable("skills") String skills){
         return graphsDashBoardService.getCandidatesListAccordingToStatus(action, skills);
     }
+
+	@Operation(summary = " This method is used to get count interviewer by position")
+    @GetMapping("/getInterviewerByPosition/{position}")
+    public Map<String, Integer> getCount(@PathVariable("position") String position){
+        return graphsDashBoardService.getCount(position);
+    }
+	
+	@Operation(summary = " This method is used to get list of interviewers by position")
+    @GetMapping("/getListOfData/{position}")
+	public List<Interviewer> getListOfData(@PathVariable("position") String position){
+		return graphsDashBoardService.getListOfData(position);
+	}
+	
+
 }
