@@ -85,12 +85,12 @@ public class DashBoardFilteringsByRangeOfDates {
 
 		/* Interviewer Information */
 
-		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectInterviewerRating = new HashMap<>();
+		Map<Map<String,Integer>,List<?>> addXYaxisMapAndHouringListObjectInterviewer = new HashMap<>();
 
-		addXYaxisMapAndHouringListObjectRevathi.put(getHrAndSelectorByDateRange(WorkFlowConstants.inputSelection,date), 
+		addXYaxisMapAndHouringListObjectInterviewer.put(getHrAndSelectorByDateRange(WorkFlowConstants.inputSelection,date), 
 				getListOfHrAndSelectorData(WorkFlowConstants.inputSelection));
 		
-		finalMap.put("Count OF HR's and Selectors", addXYaxisMapAndHouringListObjectRevathi);
+		finalMap.put("Count OF HR's and Selectors", addXYaxisMapAndHouringListObjectInterviewer);
 		/* Job Information */
 		
 

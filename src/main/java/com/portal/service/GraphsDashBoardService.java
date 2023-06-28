@@ -36,10 +36,8 @@ public interface GraphsDashBoardService {
 
 	Map<String, Map<String, Integer>> getCandidatesCountAccordingToStatus(String action, String skills);
 
-	List<Candidate> getCandidatesListAccordingToStatus(String action, String skills
+	List<Candidate> getCandidatesListAccordingToStatus(String action, String skills);
 	
-	Map<String, Integer> getCount(String position);
-
 	List<Interviewer> getListOfData(String position);
 	
 }

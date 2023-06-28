@@ -121,11 +121,7 @@ public class GraphsDashBoardController {
         return graphsDashBoardService.getCandidatesListAccordingToStatus(action, skills);
     }
 
-	@Operation(summary = " This method is used to get count interviewer by position")
-    @GetMapping("/getInterviewerByPosition/{position}")
-    public Map<String, Integer> getCount(@PathVariable("position") String position){
-        return graphsDashBoardService.getCount(position);
-    }
+
 	
 	@Operation(summary = " This method is used to get list of interviewers by position")
     @GetMapping("/getListOfData/{position}")

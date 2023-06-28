@@ -427,6 +427,8 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	}
 
 	
+	
+	
 	/**
 	 * @author Revathi Muddani
 	 * @return Map<String, Integer>
@@ -453,6 +455,35 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 			}    
 		}
 		return positionsMap;
+	}
+	
+	
+	/**
+	 * @author Revathi Muddani
+	 * @return List<Interviewer> 
+	 * 
+	 * {@summary: This method is used to return the List of interviewer  }
+	 */
+
+	@Override
+	public	List<Interviewer> getListOfData(String position){
+		String[] placeHondersForDashBoardsGraphsSplitInArray = position.split(",");
+		List<Interviewer> interviewersList = interviewerRepository.findAll();
+		
+		List<Interviewer> newInterviewers = new ArrayList<>();
+
+		for(String str : placeHondersForDashBoardsGraphsSplitInArray ) {
+			if(str.equalsIgnoreCase("HR")) {
+				List<Interviewer> listHr = interviewersList.stream().filter(x->x.isHr()).collect(Collectors.toList());
+				newInterviewers.addAll(listHr);
+			}
+			if(str.equalsIgnoreCase("SELECTOR")) {
+				List<Interviewer> listSelector = interviewersList.stream().filter(x->x.isSelector()).collect(Collectors.toList());
+				newInterviewers.addAll(listSelector);
+			}    
+		}
+		return newInterviewers;
+
 	}
 	
 	/**
@@ -586,26 +617,12 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 			}
 		}
 		return candidatesAction;
-
-	@Override
-	public List<Interviewer> getListOfData(String position) {
-		String[] placeHondersForDashBoardsGraphsSplitInArray = position.split(",");
-		List<Interviewer> interviewersList = interviewerRepository.findAll();
-		
-		List<Interviewer> newInterviewers = new ArrayList<>();
-
-		for(String str : placeHondersForDashBoardsGraphsSplitInArray ) {
-			if(str.equalsIgnoreCase("HR")) {
-				List<Interviewer> listHr = interviewersList.stream().filter(x->x.isHr()).collect(Collectors.toList());
-				newInterviewers.addAll(listHr);
-			}
-			if(str.equalsIgnoreCase("SELECTOR")) {
-				List<Interviewer> listSelector = interviewersList.stream().filter(x->x.isSelector()).collect(Collectors.toList());
-				newInterviewers.addAll(listSelector);
-			}    
-		}
-		return newInterviewers;
-
 	}
 
+
+	
+	
 }
+
+
+	
