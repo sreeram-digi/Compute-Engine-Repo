@@ -24,4 +24,5 @@ public class WorkFlowConstants {
 
     public static final String appliedWorkflowConstants="Applied";
 	
+    public static final String appliedSelectedRejectedValues="Applied,Rejected,Selected";
 }

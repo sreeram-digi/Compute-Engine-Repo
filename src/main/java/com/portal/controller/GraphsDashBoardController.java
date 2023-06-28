@@ -32,6 +32,14 @@ public class GraphsDashBoardController {
 		log.info("HIT :: Filtering data for all the graphs in DashBoard Page");
 		return graphsDashBoardService.getAllInformationForCandidateRatingsCandidateWorkFlowInterviewerInformationAndJobInformation(dateFromDropDown);
 	}
+	
+	@Operation(summary = "Filtering data for jobskills,jobtitle,joblocation the graphs in DashBoard Page")
+	@GetMapping("/filteringJobLocationJobSKillsJobTitleByDate/{dateFromDropDown}")
+	public Map<String,Map<Map<String,Map<String,Integer>>,List<?>>> 
+	getAllInformationForJobLocationAndJobSkillSetAndJobTitleFromCandidateAndCandidateFeedback(@PathVariable("dateFromDropDown")String dateFromDropDown) throws Exception{
+		
+		return graphsDashBoardService.getAllInformationForJobLocationAndJobSkillSetAndJobTitleFromCandidateAndCandidateFeedback(dateFromDropDown);
+	}
 
 	@Operation(summary = "This method is used to get number of candidates with rating")
 	@GetMapping(value = "/candidateListWithRating/{rating}")
@@ -93,7 +101,7 @@ public class GraphsDashBoardController {
 
 	@Operation(summary = " This method is used to get count for location")
 	@GetMapping("/getCandidatesCountByJobLocation/{locationCandidateCount}/{action}")
-	public Map<String,Map<String, Long>> getCandidatesCountByJobLocation(@PathVariable("action") String action,@PathVariable("locationCandidateCount") String locationCandidateCount) {
+	public Map<String, Map<String, Integer>> getCandidatesCountByJobLocation(@PathVariable("action") String action,@PathVariable("locationCandidateCount") String locationCandidateCount) {
 		return graphsDashBoardService.getCandidatesCountByJobLocation(action,locationCandidateCount);
 	}
 

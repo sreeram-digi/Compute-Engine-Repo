@@ -102,6 +102,9 @@ public class DashBoardFilteringsByRangeOfDates {
 
 	public Map<String,Integer> getCandidateWorkflowByDateRange(String inputDropdownCriteria , long inputDateRange){
 		
+		LocalDate startingDate =LocalDate.now().minusWeeks(inputDateRange);
+		LocalDate endDate = LocalDate.now();
+		
 		List<CandidateFeedback> filteredCandidateDataUponGivenRangeDates = new ArrayList<>();
 		Map<String,Integer> storageForXandYaxisPlottingValues = new HashMap<>();
 		String[] placeHoldersForDashBoardsGraphsSplitInArray = inputDropdownCriteria.split(",");
@@ -113,9 +116,9 @@ public class DashBoardFilteringsByRangeOfDates {
 			List<CandidateHistory> consistsOfAllCandidateHistoryInformation = candidateFeedback.getCandidateHistory();
 
 			if(consistsOfAllCandidateHistoryInformation.get(consistsOfAllCandidateHistoryInformation.size()-1)
-					.getLastModifiedDate().toLocalDate().isAfter(LocalDate.now().minusWeeks(1)) && 
+					.getLastModifiedDate().toLocalDate().isAfter(startingDate) && 
 					consistsOfAllCandidateHistoryInformation.get(consistsOfAllCandidateHistoryInformation.size()-1)
-					.getLastModifiedDate().toLocalDate().isBefore(LocalDate.now())) {
+					.getLastModifiedDate().toLocalDate().isBefore(endDate)) {
 				filteredCandidateDataUponGivenRangeDates.add(candidateFeedback);
 			}
 
@@ -287,9 +290,10 @@ public class DashBoardFilteringsByRangeOfDates {
 			if(str.equalsIgnoreCase("SELECTOR")) {
 				List<Interviewer> listSelector = interviewersList.stream().filter(x->x.isSelector()).collect(Collectors.toList());
 				newInterviewers.addAll(listSelector);
-			}    
+	}    
 		}
 		return newInterviewers;
 	}
 
+	
 }

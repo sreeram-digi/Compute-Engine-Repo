@@ -1,5 +1,6 @@
 package com.portal.service.impl;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import com.portal.repository.InterviewerRepository;
 import com.portal.repository.JobRepository;
 import com.portal.service.GraphsDashBoardService;
 import com.portal.utils.DashBoardFilteringsByRangeOfDates;
+import com.portal.utils.JobDashboardGraphsFilteringByRange;
 
 @Service
 public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
@@ -42,6 +44,8 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	@Autowired
 	JobRepository jobRepository;
 
+	@Autowired
+	JobDashboardGraphsFilteringByRange jobDashboardGraphsFilteringByRange;
 
 
 	@Override
@@ -50,6 +54,13 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 
 		return boardFilteringsByRangeOfDates.getAllInformationForCandidateRatingsCandidateWorkFlowInterviewerInformationAndJobInformation(dateFromDropDown);
 	}
+	
+	@Override
+	public Map<String,Map<Map<String,Map<String,Integer>>,List<?>>> 
+	getAllInformationForJobLocationAndJobSkillSetAndJobTitleFromCandidateAndCandidateFeedback(String dateFromDropDown) throws Exception{
+		return jobDashboardGraphsFilteringByRange.getAllInformationForJobLocationAndJobSkillSetAndJobTitleFromCandidateAndCandidateFeedback(dateFromDropDown);
+	}
+	
 
 	/**
 	 * @author Naga Sreeram
@@ -101,54 +112,63 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	 */
 
 	@Override
-	public Map<String,Map<String, Long>> getCandidatesCountByJobLocation(String action, String locationCandidateCount) {
+	public Map<String,Map<String, Integer>> getCandidatesCountByJobLocation(String action, String locationCandidateCount) {
 
-		Map<String,Map<String, Long>> finalMap = new HashMap<>();
+		Map<String, Map<String, Integer>> finalMap = new HashMap<>();
+      
+        String[] splitIntoSelectSpecificAction = action.split(",");
+        String[] splitIntoLocation = locationCandidateCount.split(",");
 
-		String[] splitIntoSelectSpecificAction = action.split(",");
-		String[] splitIntoLocation = locationCandidateCount.split("&");
+ 
 
-		for(int i=0; i<splitIntoLocation.length; i++) {
-			Map<String,Long> storageForXandYaxisPlottingValues = new HashMap<>();
-			for(int j=0; j<splitIntoSelectSpecificAction.length; j++) {
-				String selectSpecificAction = null;
-				long count = 0;
-				switch(splitIntoSelectSpecificAction[j]) {
-				case("Applied"):
-					selectSpecificAction = WorkFlowConstants.appliedWorkflowConstants;
-				break;
-				case("Selected"):
-					selectSpecificAction = WorkFlowConstants.selectedWorkflowConstants;
-				break;
-				case("Rejected"):
-					selectSpecificAction = WorkFlowConstants.rejectedWorkflowConstants;
-				break;
-				default:
-					selectSpecificAction = WorkFlowConstants.appliedWorkflowConstants;
-					break;
-				}
-				String[] filteredActionInputFromUser = selectSpecificAction.split(",");
+        for(int i=0; i<splitIntoLocation.length; i++) {
+            Map<String,Integer> storageForXandYaxisPlottingValues = new HashMap<>();
+            for(int j=0; j<splitIntoSelectSpecificAction.length; j++) {
+				List<Candidate> tempStatusList= new ArrayList<>();
 
-				for(int k=0; k<filteredActionInputFromUser.length; k++) {
+                String selectSpecificAction = null;
+                long count = 0;
+                switch(splitIntoSelectSpecificAction[j]) {
+                case("Applied"):
+                    selectSpecificAction = WorkFlowConstants.appliedWorkflowConstants;
+                break;
+                case("Selected"):
+                    selectSpecificAction = WorkFlowConstants.selectedWorkflowConstants;
+                break;
+                case("Rejected"):
+                    selectSpecificAction = WorkFlowConstants.rejectedWorkflowConstants;
+                break;
+                default:
+                    selectSpecificAction = WorkFlowConstants.appliedWorkflowConstants;
+                    break;
+                }
+                String[] filteredActionInputFromUser = selectSpecificAction.split(",");
 
-					List<CandidateFeedback> feedbackList = candidateFeedbackRepository.findBystatus(filteredActionInputFromUser[k]);
-					for(CandidateFeedback candidateFeedback:feedbackList) {
-						Candidate candidate = candidateRepository.findById(candidateFeedback.getId()).get();
-						Job job = jobRepository.findByLocation(splitIntoLocation[i]);
-						if(job.getId().contains(candidate.getJobId())) { 
-							count++;
-						}
-						if(filteredActionInputFromUser[k].equalsIgnoreCase("Applied")) {
-							count =  candidateRepository.findAll().stream()
-									.filter(p->p.getJobId().equals(job.getId())).count();
-						}
-					}
-				}
-				storageForXandYaxisPlottingValues.put(splitIntoSelectSpecificAction[j], count);
-			}
-			finalMap.put(splitIntoLocation[i], storageForXandYaxisPlottingValues);
-		}
-		return finalMap;
+                for(int k=0; k<filteredActionInputFromUser.length; k++) {
+
+                    List<CandidateFeedback> feedbackList = candidateFeedbackRepository.findBystatus(filteredActionInputFromUser[k]);
+                    for(CandidateFeedback candidateFeedback:feedbackList) {
+                        Candidate candidate = candidateRepository.findById(candidateFeedback.getId()).get();
+                        Job job = jobRepository.findByLocation(splitIntoLocation[i]);
+                       
+                            if(job.getId().contains(candidate.getJobId())) { 
+                                count++;
+                                tempStatusList.add(candidate);
+                            }
+                                 
+                            if(filteredActionInputFromUser[k].equalsIgnoreCase("Applied")) {
+                            	tempStatusList  =  candidateRepository.findAll().stream()
+                                        .filter(p->p.getJobId().equals(job.getId())).toList();
+                            }
+                        
+                    }
+                }
+                storageForXandYaxisPlottingValues.put(splitIntoSelectSpecificAction[j], tempStatusList.size());
+            }
+            finalMap.put(splitIntoLocation[i], storageForXandYaxisPlottingValues);
+        }
+        
+        return finalMap;
 	}
 
 
@@ -416,6 +436,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 								returningCandidateList.add(candidate);
 							}
 						}
+						
 						if(sublistOfstatus.equals("Applied")) {
 							tempStatusList=candidateRepository.findAll().stream().filter(p->p.getJobTitle().equalsIgnoreCase(inputJobTitleObject)).toList();
 							returningCandidateList.addAll(tempStatusList);
@@ -515,7 +536,8 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 
 	@Override
 	public Map<String, Map<String, Integer>> getCandidatesCountAccordingToStatus(String actions, String skills) {
-
+		
+	
 		String[] actionArray = actions.split(",");
 		String[] skillArray = skills.split("&");
 
@@ -557,11 +579,9 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 				break;
 			}
 
-			for(Candidate candidate : candidateList) {
-				if(candidate.getCandidateFeedback().getStatus().equalsIgnoreCase(action)) {
-					candidatesAction.add(candidate);
-				}
-			}
+			candidatesAction.addAll(candidateList.stream()
+					.filter(candidate->candidate.getCandidateFeedback().getStatus().equalsIgnoreCase(action))
+					.toList());
 		}
 		return candidatesAction.size();
 	}
@@ -615,11 +635,9 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 				break;
 			}
 			
-			for(Candidate candidate : candidateList) {
-				if(candidate.getCandidateFeedback().getStatus().equalsIgnoreCase(action)) {
-					candidatesAction.add(candidate);
-				}
-			}
+			candidatesAction.addAll(candidateList.stream()
+					.filter(candidate->candidate.getCandidateFeedback().getStatus().equalsIgnoreCase(action))
+					.toList());
 		}
 		return candidatesAction;
 	}

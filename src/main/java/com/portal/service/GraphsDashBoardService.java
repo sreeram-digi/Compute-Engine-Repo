@@ -7,9 +7,12 @@ import com.portal.bean.Interviewer;
 
 public interface GraphsDashBoardService {
 
-	public Map<String,Map<Map<String,Integer>,List<?>>> 
+	Map<String,Map<Map<String,Integer>,List<?>>> 
 	getAllInformationForCandidateRatingsCandidateWorkFlowInterviewerInformationAndJobInformation(String dateFromDropDown);
 
+	Map<String,Map<Map<String,Map<String,Integer>>,List<?>>> 
+	getAllInformationForJobLocationAndJobSkillSetAndJobTitleFromCandidateAndCandidateFeedback(String dateFromDropDown)throws Exception;
+	
 	Map<String,Integer> getCandidateByRatings(String rating);
 
 	List<Candidate> getAllCandidatesByRatings(String rating);
@@ -28,7 +31,7 @@ public interface GraphsDashBoardService {
 
 	List<Candidate> getAllCandidateFeedbackIntoList(String action, String locationCandidateCount);
 
-	Map<String, Map<String, Long>> getCandidatesCountByJobLocation(String action, String locationCandidateCount);
+	Map<String, Map<String, Integer>> getCandidatesCountByJobLocation(String action, String locationCandidateCount);
 
 	List<String> getAllJobPostedLocation();
 
