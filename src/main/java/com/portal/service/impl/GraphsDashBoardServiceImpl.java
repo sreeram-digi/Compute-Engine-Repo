@@ -106,7 +106,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 		Map<String,Map<String, Long>> finalMap = new HashMap<>();
 
 		String[] splitIntoSelectSpecificAction = action.split(",");
-		String[] splitIntoLocation = locationCandidateCount.split(",");
+		String[] splitIntoLocation = locationCandidateCount.split("&");
 
 		for(int i=0; i<splitIntoLocation.length; i++) {
 			Map<String,Long> storageForXandYaxisPlottingValues = new HashMap<>();
@@ -163,7 +163,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 		List<Candidate> listHoldingIndividualInformation = new ArrayList<>();
 
 		String[] splitIntoSelectSpecificAction = action.split(",");
-		String[] splitIntoLocation = locationCandidateCount.split(",");
+		String[] splitIntoLocation = locationCandidateCount.split("&");
 
 		for(int i=0; i<splitIntoLocation.length; i++) {
 
@@ -517,7 +517,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	public Map<String, Map<String, Integer>> getCandidatesCountAccordingToStatus(String actions, String skills) {
 
 		String[] actionArray = actions.split(",");
-		String[] skillArray = skills.split(",");
+		String[] skillArray = skills.split("&");
 
 		
 		Map<String,Map<String,Integer>> allMap = new HashMap<>();
@@ -578,7 +578,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	public List<Candidate> getCandidatesListAccordingToStatus(String actions, String skills) {
 
 		String[] actionArray = actions.split(",");
-		String[] skillArray = skills.split(",");
+		String[] skillArray = skills.split("&");
 
 		List<Candidate> listOfCandidates = new ArrayList<>();
 
