@@ -374,19 +374,21 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	 * @return List<Candidate>
 	 * 
 	 * {@summary: this method is to get list of candidates for job titles against status }
+	 * @throws Exception 
 	 */
 
 	@Override
-	public List<Candidate> getListOfCandidatesForJobTitle(String inputJobtitle) {
-
-		List<String> jobTitleList=jobRepository.findAll().stream().map(p->p.getJobTitle()).distinct().toList();
+	public List<Candidate> getListOfCandidatesForJobTitle(String inputJobtitle,String status) throws Exception {
+		
 		List<Candidate> returningCandidateList=new ArrayList<>();
+		
+		List<String> jobTitleList=jobRepository.findAll().stream().map(p->p.getJobTitle()).distinct().toList();
+
 		for(String inputJobTitleObject:Arrays.asList(inputJobtitle.split(","))) {
 			if(jobTitleList.contains(inputJobTitleObject)){
 
-				List<String> statusList=Arrays.asList(inputJobTitleObject.split(","));
+				List<String> statusList=Arrays.asList(status.split(","));
 				for(String singleStatusObject:statusList) {
-
 					List<String> multipleStatusList=new ArrayList<>();
 					List<Candidate> tempStatusList= new ArrayList<>();
 					switch(singleStatusObject) {
@@ -405,7 +407,6 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 					}
 
 					for(String sublistOfstatus:multipleStatusList) {
-
 						List<CandidateFeedback> candidateFeedback=candidateFeedbackRepository.findBystatus(sublistOfstatus);
 						List<String> candidateIds =candidateFeedback.stream().map(CandidateFeedback::getId).toList();
 						for(String candidateId:candidateIds) {
@@ -422,10 +423,14 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 					}
 				}
 			}
-		}
-		return returningCandidateList;
+			else {
+				throw new Exception("Job Title not found");
+			}
+			
 	}
+		return returningCandidateList;
 
+	}
 	
 	
 	

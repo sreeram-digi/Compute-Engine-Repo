@@ -22,7 +22,7 @@ public interface GraphsDashBoardService {
 
 	Map<String,Map<String,Integer>> getDataForJobTitleAgainstStatus(String inputJobTiltles, String status) throws Exception;
 
-	List<Candidate> getListOfCandidatesForJobTitle(String inputJobtitle);
+	List<Candidate> getListOfCandidatesForJobTitle(String inputJobtitle,String status) throws Exception;
 
 	List<String> getAllJobTitlesForDropDown();
 

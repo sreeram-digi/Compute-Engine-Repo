@@ -79,9 +79,10 @@ public class GraphsDashBoardController {
 	}
 
 	@Operation(summary = " This method is used to get list of candidate for job title")
-	@GetMapping("/getListForJobTitleAgainstStatus/{inputJobTiltle}")
-	public List<Candidate> getListOfCandidatesForJobTitle(@PathVariable("inputJobTiltle") String inputJobtitle) {
-		return graphsDashBoardService.getListOfCandidatesForJobTitle(inputJobtitle);
+	@GetMapping("/getListForJobTitleAgainstStatus/{inputJobTiltles}/{status}")
+	public List<Candidate> getListOfCandidatesForJobTitle(@PathVariable("inputJobTiltles") String inputJobtitle,
+			@PathVariable("status") String status) throws Exception {
+		return graphsDashBoardService.getListOfCandidatesForJobTitle(inputJobtitle,status);
 	}
 
 	@Operation(summary = " This method is used to provide data for the dropdown location")
@@ -120,7 +121,6 @@ public class GraphsDashBoardController {
     public List<Candidate> getCandidatesListAccordingToStatus(@PathVariable("action") String action, @PathVariable("skills") String skills){
         return graphsDashBoardService.getCandidatesListAccordingToStatus(action, skills);
     }
-
 
 	
 	@Operation(summary = " This method is used to get list of interviewers by position")
