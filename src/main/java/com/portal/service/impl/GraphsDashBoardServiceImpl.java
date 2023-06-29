@@ -1,13 +1,11 @@
 package com.portal.service.impl;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +22,11 @@ import com.portal.repository.InterviewerRepository;
 import com.portal.repository.JobRepository;
 import com.portal.service.GraphsDashBoardService;
 import com.portal.utils.DashBoardFilteringsByRangeOfDates;
+import com.portal.utils.GettingListOfObjectsForGraphs;
 import com.portal.utils.JobDashboardGraphsFilteringByRange;
 
 @Service
 public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
-
-	@Autowired
-	DashBoardFilteringsByRangeOfDates boardFilteringsByRangeOfDates;
 
 	@Autowired
 	CandidateRepository candidateRepository;
@@ -43,9 +39,15 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 
 	@Autowired
 	JobRepository jobRepository;
+	
+	@Autowired
+	DashBoardFilteringsByRangeOfDates boardFilteringsByRangeOfDates;
 
 	@Autowired
 	JobDashboardGraphsFilteringByRange jobDashboardGraphsFilteringByRange;
+	
+	@Autowired
+	GettingListOfObjectsForGraphs gettingListOfObjectsForGraphs;
 
 
 	@Override
@@ -58,6 +60,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	@Override
 	public Map<String,Map<Map<String,Map<String,Integer>>,List<?>>> 
 	getAllInformationForJobLocationAndJobSkillSetAndJobTitleFromCandidateAndCandidateFeedback(String dateFromDropDown) throws Exception{
+		
 		return jobDashboardGraphsFilteringByRange.getAllInformationForJobLocationAndJobSkillSetAndJobTitleFromCandidateAndCandidateFeedback(dateFromDropDown);
 	}
 	
@@ -80,29 +83,17 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 		}
 
 		return storageForXandYaxisPlottingValues;
-
 	}
 
 	/**
 	 * @author Naga Sreeram
 	 * {@summary : When Admin's clicks on a specific bar , he can view all the data of that specific bar}
 	 */
+	
 	@Override
 	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
 
-		List<Candidate> filteredCandidateDateFromInputStatuesCriteria = new ArrayList<>();
-
-		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria =
-				candidateFeedbackRepository.findBystatus(inputStatusCriteria);
-
-		List<String> filteringCanidateID = gettingCandidateIDusingCandidateStatusCriteria.stream().map(CandidateFeedback::getId).toList();
-
-		for(int i=0; i<filteringCanidateID.size(); i++) {
-			Candidate candidateObject = candidateRepository.findById(filteringCanidateID.get(i)).get();
-			filteredCandidateDateFromInputStatuesCriteria.add(candidateObject);
-		}
-
-		return filteredCandidateDateFromInputStatuesCriteria;
+		return gettingListOfObjectsForGraphs.listOfCandidatesForSpecificSelectedWorkFLowStatus(inputStatusCriteria);
 	}
 
 
@@ -118,8 +109,6 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
       
         String[] splitIntoSelectSpecificAction = action.split(",");
         String[] splitIntoLocation = locationCandidateCount.split(",");
-
- 
 
         for(int i=0; i<splitIntoLocation.length; i++) {
             Map<String,Integer> storageForXandYaxisPlottingValues = new HashMap<>();
@@ -146,22 +135,21 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 
                 for(int k=0; k<filteredActionInputFromUser.length; k++) {
 
-                    List<CandidateFeedback> feedbackList = candidateFeedbackRepository.findBystatus(filteredActionInputFromUser[k]);
-                    for(CandidateFeedback candidateFeedback:feedbackList) {
-                        Candidate candidate = candidateRepository.findById(candidateFeedback.getId()).get();
-                        Job job = jobRepository.findByLocation(splitIntoLocation[i]);
-                       
-                            if(job.getId().contains(candidate.getJobId())) { 
-                                count++;
-                                tempStatusList.add(candidate);
-                            }
-                                 
-                            if(filteredActionInputFromUser[k].equalsIgnoreCase("Applied")) {
-                            	tempStatusList  =  candidateRepository.findAll().stream()
-                                        .filter(p->p.getJobId().equals(job.getId())).toList();
-                            }
-                        
-                    }
+                	List<CandidateFeedback> feedbackList = candidateFeedbackRepository.findBystatus(filteredActionInputFromUser[k]);
+                	for(CandidateFeedback candidateFeedback:feedbackList) {
+                		Candidate candidate = candidateRepository.findById(candidateFeedback.getId()).get();
+                		Job job = jobRepository.findByLocation(splitIntoLocation[i]);
+
+                		if(job.getId().contains(candidate.getJobId())) { 
+                			count++;
+                			tempStatusList.add(candidate);
+                		}
+
+                		if(filteredActionInputFromUser[k].equalsIgnoreCase("Applied")) {
+                			tempStatusList  =  candidateRepository.findAll().stream()
+                					.filter(p->p.getJobId().equals(job.getId())).toList();
+                		}
+                	}
                 }
                 storageForXandYaxisPlottingValues.put(splitIntoSelectSpecificAction[j], tempStatusList.size());
             }
@@ -287,29 +275,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 
 	@Override
 	public List<Candidate> getAllCandidatesByRatings(String rating) {
-		List<String> groupOfRatingsInput= Arrays.asList(rating.split(","));
-		List<CandidateFeedback> candidateFeedbacksList= candidateFeedbackRepository.findAll();
-		List<Candidate> returningCandidateList = new ArrayList<>();
-
-		for(CandidateFeedback candidateFeedback:candidateFeedbacksList) {
-			if(candidateFeedback.getFeedBack()!=null) {
-				List<Double> parsingDoubleObjectList= new ArrayList<>();
-				Map<String, Object> candidateFeeds =candidateFeedback.getFeedBack();
-				for(String candidateFeedbackObject : candidateFeeds.values().toString().split(", ")) {
-					candidateFeedbackObject=candidateFeedbackObject.replaceAll("[\\[\\],\\s]", "");
-					parsingDoubleObjectList.add(Double.parseDouble(candidateFeedbackObject));
-				}
-
-				OptionalDouble calculatedAverage=parsingDoubleObjectList.stream().mapToDouble(values->values).average();
-				for(String indivisualRating:groupOfRatingsInput) {
-					if(Integer.parseInt(indivisualRating)==((int)Math.round(calculatedAverage.getAsDouble()))){
-						Candidate candidateObject= candidateRepository.findById(candidateFeedback.getId()).get();
-						returningCandidateList.add(candidateObject);
-					}
-				}
-			}
-		}
-		return returningCandidateList;
+		return gettingListOfObjectsForGraphs.getAllCandidatesByRatings(rating);
 	}
 
 
@@ -493,22 +459,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 
 	@Override
 	public	List<Interviewer> getListOfData(String position){
-		String[] placeHondersForDashBoardsGraphsSplitInArray = position.split(",");
-		List<Interviewer> interviewersList = interviewerRepository.findAll();
-		
-		List<Interviewer> newInterviewers = new ArrayList<>();
-
-		for(String str : placeHondersForDashBoardsGraphsSplitInArray ) {
-			if(str.equalsIgnoreCase("HR")) {
-				List<Interviewer> listHr = interviewersList.stream().filter(x->x.isHr()).collect(Collectors.toList());
-				newInterviewers.addAll(listHr);
-			}
-			if(str.equalsIgnoreCase("SELECTOR")) {
-				List<Interviewer> listSelector = interviewersList.stream().filter(x->x.isSelector()).collect(Collectors.toList());
-				newInterviewers.addAll(listSelector);
-			}    
-		}
-		return newInterviewers;
+		return gettingListOfObjectsForGraphs.getListOfData(position);
 
 	}
 	
@@ -521,9 +472,8 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	
 	@Override
 	public List<String> getAllSkillsFromJob() {
-		List<Job> getAllInformationFromJob = jobRepository.findAll();
-		List<String> getAllJobBySkill = getAllInformationFromJob.stream().map(Job::getSkillSet).toList();
-		return getAllJobBySkill;
+
+		return jobRepository.findAll().stream().map(Job::getSkillSet).toList();
 	}
 
 	
@@ -536,11 +486,9 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 
 	@Override
 	public Map<String, Map<String, Integer>> getCandidatesCountAccordingToStatus(String actions, String skills) {
-		
 	
 		String[] actionArray = actions.split(",");
 		String[] skillArray = skills.split("&");
-
 		
 		Map<String,Map<String,Integer>> allMap = new HashMap<>();
 
