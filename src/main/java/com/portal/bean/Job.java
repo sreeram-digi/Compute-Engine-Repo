@@ -1,5 +1,6 @@
 package com.portal.bean;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -59,6 +60,14 @@ public class Job {
     @NotNull
     private String workType;
     
+    @NotNull
     private LocalDateTime jobPostingDate;
+
+    @NotNull
+    private LocalDateTime startingDateOfHiring;
+    
+    @NotNull
+    private LocalDateTime endingDateOfHiring;
+    
 	
 }
