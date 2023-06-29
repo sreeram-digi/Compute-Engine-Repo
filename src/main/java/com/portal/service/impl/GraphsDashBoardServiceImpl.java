@@ -108,7 +108,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 		Map<String, Map<String, Integer>> finalMap = new HashMap<>();
       
         String[] splitIntoSelectSpecificAction = action.split(",");
-        String[] splitIntoLocation = locationCandidateCount.split(",");
+        String[] splitIntoLocation = locationCandidateCount.split("&");
 
         for(int i=0; i<splitIntoLocation.length; i++) {
             Map<String,Integer> storageForXandYaxisPlottingValues = new HashMap<>();
