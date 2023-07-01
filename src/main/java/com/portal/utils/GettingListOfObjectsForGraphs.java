@@ -17,6 +17,7 @@ import com.portal.repository.CandidateFeedbackRepository;
 import com.portal.repository.CandidateRepository;
 import com.portal.repository.InterviewerRepository;
 
+
 @Component
 public class GettingListOfObjectsForGraphs {
 	
@@ -38,9 +39,12 @@ public class GettingListOfObjectsForGraphs {
 	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
 
 		List<Candidate> filteredCandidateDateFromInputStatuesCriteria = new ArrayList<>();
-
-		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria =
-				candidateFeedbackRepository.findBystatus(inputStatusCriteria);
+		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria= new ArrayList<>();
+		for(String statusOfCandidate:inputStatusCriteria.split(",")) {
+		
+			gettingCandidateIDusingCandidateStatusCriteria.addAll(candidateFeedbackRepository.findBystatus(statusOfCandidate));
+		
+		}
 
 		List<String> filteringCanidateID = gettingCandidateIDusingCandidateStatusCriteria.stream().map(CandidateFeedback::getId).toList();
 
@@ -48,7 +52,8 @@ public class GettingListOfObjectsForGraphs {
 			Candidate candidateObject = candidateRepository.findById(filteringCanidateID.get(i)).get();
 			filteredCandidateDateFromInputStatuesCriteria.add(candidateObject);
 		}
-
+		
+		System.out.println(filteredCandidateDateFromInputStatuesCriteria);
 		return filteredCandidateDateFromInputStatuesCriteria;
 	}
 	
