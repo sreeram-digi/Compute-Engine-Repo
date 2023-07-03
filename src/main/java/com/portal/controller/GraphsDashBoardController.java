@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.portal.bean.Candidate;
 import com.portal.bean.Interviewer;
+import com.portal.response.CandidateResponce;
 import com.portal.service.GraphsDashBoardService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,7 +51,7 @@ public class GraphsDashBoardController {
 
 	@Operation(summary="This method is used to get All candidates based on the rating")
 	@GetMapping("/getAllCandidatesListByRating/{rating}")
-	public List<Candidate> getAllCandidatesByRatings(@PathVariable("rating") String rating){
+	public List<CandidateResponce> getAllCandidatesByRatings(@PathVariable("rating") String rating){
 		return graphsDashBoardService.getAllCandidatesByRatings(rating);
 	}
 
@@ -62,7 +63,7 @@ public class GraphsDashBoardController {
 
 	@Operation( summary = "This method return the object of specified graph")
 	@GetMapping( value = "getAllCandidateInformationWithStatus/{inputStatusCriteria}" )
-	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(@PathVariable("inputStatusCriteria") String inputStatusCriteria) {
+	public List<CandidateResponce> listOfCandidatesForSpecificSelectedWorkFLowStatus(@PathVariable("inputStatusCriteria") String inputStatusCriteria) {
 		return graphsDashBoardService.listOfCandidatesForSpecificSelectedWorkFLowStatus(inputStatusCriteria);
 	}
 
@@ -88,7 +89,7 @@ public class GraphsDashBoardController {
 
 	@Operation(summary = " This method is used to get list of candidate for job title")
 	@GetMapping("/getListForJobTitleAgainstStatus/{inputJobTiltles}/{status}")
-	public List<Candidate> getListOfCandidatesForJobTitle(@PathVariable("inputJobTiltles") String inputJobtitle,
+	public List<CandidateResponce> getListOfCandidatesForJobTitle(@PathVariable("inputJobTiltles") String inputJobtitle,
 			@PathVariable("status") String status) throws Exception {
 		return graphsDashBoardService.getListOfCandidatesForJobTitle(inputJobtitle,status);
 	}
@@ -108,7 +109,7 @@ public class GraphsDashBoardController {
 
 	@Operation(summary = " This method is used to get list of candidates for location")
 	@GetMapping("/getAllCandidateLocationByList/{locationCandidateCount}/{action}")
-	public List<Candidate> getAllCandidateFeedbackIntoList(@PathVariable("action") String action,@PathVariable("locationCandidateCount") String locationCandidateCount) {
+	public List<CandidateResponce> getAllCandidateFeedbackIntoList(@PathVariable("action") String action,@PathVariable("locationCandidateCount") String locationCandidateCount) {
 		return graphsDashBoardService.getAllCandidateFeedbackIntoList(action, locationCandidateCount);
 	}
 	
@@ -125,8 +126,8 @@ public class GraphsDashBoardController {
     }
 
     @Operation(summary = "This method is used to return the List of candidates according to status and skill set")
-    @GetMapping("/getCandidatesListAccordingToStatus/{action}/{skills}")
-    public List<Candidate> getCandidatesListAccordingToStatus(@PathVariable("action") String action, @PathVariable("skills") String skills){
+    @GetMapping("/getCandidatesListAccordingToSkills/{action}/{skills}")
+    public List<CandidateResponce> getCandidatesListAccordingToStatus(@PathVariable("action") String action, @PathVariable("skills") String skills){
         return graphsDashBoardService.getCandidatesListAccordingToStatus(action, skills);
     }
 

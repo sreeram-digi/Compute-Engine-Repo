@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import com.portal.bean.Job;
 import com.portal.repository.CandidateFeedbackRepository;
 import com.portal.repository.CandidateRepository;
 import com.portal.repository.JobRepository;
+import com.portal.response.CandidateResponce;
 
 @Component
 public class JobDashboardGraphsFilteringByRange {
@@ -39,6 +41,9 @@ public class JobDashboardGraphsFilteringByRange {
 		long date = 0;
 
 		switch(dateFromDropDown) {
+		case("Daily"):
+			date = 0;
+		break;
 		case("Weekly"):
 			date = 1;
 		break;
@@ -55,7 +60,7 @@ public class JobDashboardGraphsFilteringByRange {
 			date = 52;
 		break;
 		default:
-			date = 0;
+			date = 52;
 		}
 
 		/* Job location */
@@ -86,15 +91,19 @@ public class JobDashboardGraphsFilteringByRange {
 		return finalMap;
 
 	}
+	
+	
+	
+	/**
+	 * @author Naga Sreeram
+	 * {@summary : Filtering by job location and returning the Count of candiadtes with respective to status }
+	 */
 
 	public Map<String,Map<String,Integer>> getAllJobLocationFromDateRange(long inputDate){
-
 
 		Map<String, Map<String, Integer>> finalMap = new HashMap<>();
 		LocalDate startingDate =LocalDate.now().minusWeeks(inputDate);
 		LocalDate endDate = LocalDate.now();
-
-
 
 		String[] splitIntoSelectSpecificAction = WorkFlowConstants.appliedSelectedRejectedValues.split(",");
 
@@ -157,18 +166,23 @@ public class JobDashboardGraphsFilteringByRange {
 	}
 
 
+	/**
+	 * @author Naga Sreeram
+	 * {@summary : Filtering by job location and returning the list of candiadtes with respective to status }
+	 */
 
-	public List<Candidate> getAllCandidateFeedbackIntoList(String action) {
+	public List<CandidateResponce> getAllCandidateFeedbackIntoList(String action) {
 		
-		List<Candidate> listHoldingIndividualInformation = new ArrayList<>();
+		List<Job> splitIntoLocation = jobRepository.findAll();
+		
+		List<CandidateResponce> listHoldingIndividualInformation = new ArrayList<>();
 
 		String[] splitIntoSelectSpecificAction = action.split(",");
 
-		List<Job> splitIntoLocation=jobRepository.findAll();
-		
-		for(int i=0; i<splitIntoLocation.size(); i++) {
+		for(Job job : splitIntoLocation) {
 
 			for(int j=0; j<splitIntoSelectSpecificAction.length; j++) {
+
 				String selectSpecificAction = null;
 				switch(splitIntoSelectSpecificAction[j]) {
 				case("Applied"):
@@ -191,18 +205,76 @@ public class JobDashboardGraphsFilteringByRange {
 					List<CandidateFeedback> feedbackList = candidateFeedbackRepository.findBystatus(filteredActionInputFromUser[k]);
 					for(CandidateFeedback candidateFeedback:feedbackList) {
 						Candidate candidate = candidateRepository.findById(candidateFeedback.getId()).get();
-						Job job = jobRepository.findByLocation(splitIntoLocation.get(i).getLocation());
 						if(job.getId().contains(candidate.getJobId())) { 
-							listHoldingIndividualInformation.add(candidate);
+							CandidateResponce candidateResponce = new  CandidateResponce();
+							BeanUtils.copyProperties(candidate, candidateResponce);
+							listHoldingIndividualInformation.add(candidateResponce);
+						}
+
+						if(filteredActionInputFromUser[k].equalsIgnoreCase("Applied")) {
+							candidateRepository.findAll().stream()
+							.filter(p->p.getJobId().equals(job.getId())).toList()
+							.forEach(candidates->{
+								CandidateResponce candidateResponce = new  CandidateResponce();
+								BeanUtils.copyProperties(candidates, candidateResponce);
+								listHoldingIndividualInformation.add(candidateResponce);
+							});
 						}
 					}
 				}
 			}
 		}
 		return listHoldingIndividualInformation;
+		
+		
+//		List<Candidate> listHoldingIndividualInformation = new ArrayList<>();
+//
+//		String[] splitIntoSelectSpecificAction = action.split(",");
+//		
+//		for(int i=0; i<splitIntoLocation.size(); i++) {
+//
+//			for(int j=0; j<splitIntoSelectSpecificAction.length; j++) {
+//				String selectSpecificAction = null;
+//				switch(splitIntoSelectSpecificAction[j]) {
+//				case("Applied"):
+//					selectSpecificAction = WorkFlowConstants.appliedWorkflowConstants;
+//				break;
+//				case("Selected"):
+//					selectSpecificAction = WorkFlowConstants.selectedWorkflowConstants;
+//				break;
+//				case("Rejected"):
+//					selectSpecificAction = WorkFlowConstants.rejectedWorkflowConstants;
+//				break;
+//				default:
+//					selectSpecificAction = WorkFlowConstants.appliedWorkflowConstants;
+//					break;
+//				}
+//				String[] filteredActionInputFromUser = selectSpecificAction.split(",");
+//
+//				for(int k=0; k<filteredActionInputFromUser.length; k++) {
+//
+//					List<CandidateFeedback> feedbackList = candidateFeedbackRepository.findBystatus(filteredActionInputFromUser[k]);
+//					for(CandidateFeedback candidateFeedback:feedbackList) {
+//						Candidate candidate = candidateRepository.findById(candidateFeedback.getId()).get();
+//						Job job = jobRepository.findByLocation(splitIntoLocation.get(i).getLocation());
+//						if(job.getId().contains(candidate.getJobId())) { 
+//							listHoldingIndividualInformation.add(candidate);
+//						}
+//					}
+//				}
+//			}
+//		}
+//		return listHoldingIndividualInformation;
 	}
 
 
+	/**
+	 * @author Preeti Rani Pal
+	 * @return List<Candidate>
+	 * 
+	 * {@summary: this method is to get Count of candidates for job titles against status }
+	 * @throws Exception 
+	 */
 
 	public Map<String,Map<String,Integer>> getAllJobTitleFromDateRange(long inputDate) throws Exception{
 
@@ -270,15 +342,21 @@ public class JobDashboardGraphsFilteringByRange {
 
 	}
 
+	/**
+	 * @author Preeti Rani Pal
+	 * @return List<Candidate>
+	 * 
+	 * {@summary: this method is to get list of candidates for job titles against status }
+	 * @throws Exception 
+	 */
 
-
-	public List<Candidate> getListOfCandidatesForJobTitle(String status) throws Exception {
-
-		List<Candidate> returningCandidateList=new ArrayList<>();
-
+	public List<CandidateResponce> getListOfCandidatesForJobTitle(String status) throws Exception {
+		
 		List<String> jobTitleList=jobRepository.findAll().stream().map(p->p.getJobTitle()).toList();
 
-		for(String inputJobTitleObject:jobTitleList) {
+		List<CandidateResponce> returningCandidateList=new ArrayList<>();
+
+		for(String inputJobTitleObject : jobTitleList) {
 			if(jobTitleList.contains(inputJobTitleObject)){
 
 				List<String> statusList=Arrays.asList(status.split(","));
@@ -307,13 +385,19 @@ public class JobDashboardGraphsFilteringByRange {
 							Candidate candidate	=candidateRepository.findById(candidateId).get();
 							if(candidate.getJobTitle().equalsIgnoreCase(inputJobTitleObject)) {
 								tempStatusList.add(candidate);
-								returningCandidateList.add(candidate);
+								CandidateResponce candidateResponce = new  CandidateResponce();
+								BeanUtils.copyProperties(candidate, candidateResponce);
+								returningCandidateList.add(candidateResponce);
 							}
 						}
-
+						
 						if(sublistOfstatus.equals("Applied")) {
 							tempStatusList=candidateRepository.findAll().stream().filter(p->p.getJobTitle().equalsIgnoreCase(inputJobTitleObject)).toList();
-							returningCandidateList.addAll(tempStatusList);
+							for(Candidate candidate : tempStatusList) {
+								CandidateResponce candidateResponce = new  CandidateResponce();
+								BeanUtils.copyProperties(candidate, candidateResponce);
+								returningCandidateList.add(candidateResponce);
+							}
 						}
 					}
 				}
@@ -321,15 +405,69 @@ public class JobDashboardGraphsFilteringByRange {
 			else {
 				throw new Exception("Job Title not found");
 			}
-
-		}
+			
+	}
 		return returningCandidateList;
+		
+
+//		for(String inputJobTitleObject:jobTitleList) {
+//			if(jobTitleList.contains(inputJobTitleObject)){
+//
+//				List<String> statusList=Arrays.asList(status.split(","));
+//				for(String singleStatusObject:statusList) {
+//					List<String> multipleStatusList=new ArrayList<>();
+//					List<Candidate> tempStatusList= new ArrayList<>();
+//					switch(singleStatusObject) {
+//
+//					case "Applied":
+//						multipleStatusList.add(WorkFlowConstants.appliedWorkflowConstants);
+//						break;
+//
+//					case "Selected":
+//						multipleStatusList.addAll(Arrays.asList(WorkFlowConstants.selectedWorkflowConstants.split(",")));
+//						break;
+//
+//					case "Rejected":
+//						multipleStatusList.addAll(Arrays.asList(WorkFlowConstants.rejectedWorkflowConstants.split(",")));
+//						break;	
+//					}
+//
+//					for(String sublistOfstatus:multipleStatusList) {
+//						List<CandidateFeedback> candidateFeedback=candidateFeedbackRepository.findBystatus(sublistOfstatus);
+//						List<String> candidateIds =candidateFeedback.stream().map(CandidateFeedback::getId).toList();
+//						for(String candidateId:candidateIds) {
+//							Candidate candidate	=candidateRepository.findById(candidateId).get();
+//							if(candidate.getJobTitle().equalsIgnoreCase(inputJobTitleObject)) {
+//								tempStatusList.add(candidate);
+//								returningCandidateList.add(candidate);
+//							}
+//						}
+//
+//						if(sublistOfstatus.equals("Applied")) {
+//							tempStatusList=candidateRepository.findAll().stream().filter(p->p.getJobTitle().equalsIgnoreCase(inputJobTitleObject)).toList();
+//							returningCandidateList.addAll(tempStatusList);
+//						}
+//					}
+//				}
+//			}
+//			else {
+//				throw new Exception("Job Title not found");
+//			}
+//
+//		}
+//		return returningCandidateList;
 
 	}
 
+	
+	/**
+	 * @author Revathi Muddani
+	 * @return List<Candidate>
+	 * 
+	 * {@summary: This method is used to return the Count of candidates according to status and skill set }
+	 */
+	
 	public Map<String, Map<String, Integer>> getCandidatesCountAccordingToStatus(String actions,long inputDateRange) {
-
-
 
 		String[] actionArray = actions.split(",");
 
@@ -339,8 +477,7 @@ public class JobDashboardGraphsFilteringByRange {
 
 		for(Job jobs : jobList) {
 
-			Job job = jobRepository.findBySkillSet(jobs.getSkillSet());
-			List<Candidate> candidateList = candidateRepository.findByJobId(job.getId());
+			List<Candidate> candidateList = candidateRepository.findByJobId(jobRepository.findBySkillSet(jobs.getSkillSet()).getId());
 			Map<String,Integer> countMap = new HashMap<>();
 
 			for(String action : actionArray) {
@@ -360,8 +497,6 @@ public class JobDashboardGraphsFilteringByRange {
 		}
 		return allMap;
 	}
-
-
 
 	public Integer getCandidateCount(List<Candidate> candidateList, String[] actions,long inputDateRange) {
 
@@ -394,18 +529,17 @@ public class JobDashboardGraphsFilteringByRange {
 	 * {@summary: This method is used to return the List of candidates according to status and skill set }
 	 */
 
-	public List<Candidate> getCandidatesListAccordingToStatus(String actions) {
+	public List<CandidateResponce> getCandidatesListAccordingToStatus(String actions) {
 
 		String[] actionArray = actions.split(",");
 
-		List<Candidate> listOfCandidates = new ArrayList<>();
+		List<CandidateResponce> listOfCandidates = new ArrayList<>();
 
 		List<Job> jobList = jobRepository.findAll();
 
 		for(Job jobs : jobList) {
 
-			Job job = jobRepository.findBySkillSet(jobs.getSkillSet());
-			List<Candidate> candidateList = candidateRepository.findByJobId(job.getId());
+			List<Candidate> candidateList = candidateRepository.findByJobId(jobRepository.findBySkillSet(jobs.getSkillSet()).getId());
 
 			for(String action : actionArray) {
 
@@ -424,23 +558,29 @@ public class JobDashboardGraphsFilteringByRange {
 		return listOfCandidates;
 	}
 
+	public List<CandidateResponce> getCandidateList(List<Candidate> candidateList, String[] actions) {
 
-
-	public List<Candidate> getCandidateList(List<Candidate> candidateList, String[] actions) {
-
-		List<Candidate> candidatesAction = new ArrayList<>();
+		List<CandidateResponce> candidatesResponceAction = new ArrayList<>();
 
 		for(String action : actions) {
+
 			if(action.equalsIgnoreCase("Applied")) {
-				candidatesAction.addAll(candidateList);
-				break;
+				for(Candidate candidate : candidateList) {
+					CandidateResponce candidateResponce = new  CandidateResponce();
+					BeanUtils.copyProperties(candidate, candidateResponce);
+					candidatesResponceAction.add(candidateResponce);
+				}
 			}
 
-			candidatesAction.addAll(candidateList.stream()
-					.filter(candidate->candidate.getCandidateFeedback().getStatus().equalsIgnoreCase(action))
-					.toList());
+			candidateList.stream()
+			.filter(candidate->candidate.getCandidateFeedback().getStatus().equalsIgnoreCase(action))
+			.forEach(candidates->{
+				CandidateResponce candidateResponce = new  CandidateResponce();
+				BeanUtils.copyProperties(candidates, candidateResponce);
+				candidatesResponceAction.add(candidateResponce);
+			});
 		}
-		return candidatesAction;
+		return candidatesResponceAction;
 	}
 
 
