@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import com.portal.bean.Interviewer;
 import com.portal.repository.CandidateFeedbackRepository;
 import com.portal.repository.CandidateRepository;
 import com.portal.repository.InterviewerRepository;
+import com.portal.response.CandidateResponce;
 
 
 @Component
@@ -36,21 +38,22 @@ public class GettingListOfObjectsForGraphs {
 	 * @author Naga Sreeram
 	 * {@summary : When Admin's clicks on a specific bar , he can view all the data of that specific bar}
 	 */
-	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
-
-		List<Candidate> filteredCandidateDateFromInputStatuesCriteria = new ArrayList<>();
+	public List<CandidateResponce> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
+    
+		List<CandidateResponce> filteredCandidateDateFromInputStatuesCriteria = new ArrayList<>();
 		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria= new ArrayList<>();
+    
 		for(String statusOfCandidate:inputStatusCriteria.split(",")) {
-		
 			gettingCandidateIDusingCandidateStatusCriteria.addAll(candidateFeedbackRepository.findBystatus(statusOfCandidate));
-		
 		}
-
+    
 		List<String> filteringCanidateID = gettingCandidateIDusingCandidateStatusCriteria.stream().map(CandidateFeedback::getId).toList();
-
+		
 		for(int i=0; i<filteringCanidateID.size(); i++) {
 			Candidate candidateObject = candidateRepository.findById(filteringCanidateID.get(i)).get();
-			filteredCandidateDateFromInputStatuesCriteria.add(candidateObject);
+			CandidateResponce candidateResponce = new  CandidateResponce();
+			BeanUtils.copyProperties(candidateObject, candidateResponce);
+			filteredCandidateDateFromInputStatuesCriteria.add(candidateResponce);
 		}
 		
 		System.out.println(filteredCandidateDateFromInputStatuesCriteria);
@@ -65,10 +68,10 @@ public class GettingListOfObjectsForGraphs {
 	 * {@summary : The method is to get list of candidates rating  }
 	 */
 	
-	public List<Candidate> getAllCandidatesByRatings(String rating) {
+	public List<CandidateResponce> getAllCandidatesByRatings(String rating) {
 		List<String> groupOfRatingsInput= Arrays.asList(rating.split(","));
 		List<CandidateFeedback> candidateFeedbacksList= candidateFeedbackRepository.findAll();
-		List<Candidate> returningCandidateList = new ArrayList<>();
+		List<CandidateResponce> returningCandidateList = new ArrayList<>();
 
 		for(CandidateFeedback candidateFeedback:candidateFeedbacksList) {
 			if(candidateFeedback.getFeedBack()!=null) {
@@ -83,7 +86,9 @@ public class GettingListOfObjectsForGraphs {
 				for(String indivisualRating:groupOfRatingsInput) {
 					if(Integer.parseInt(indivisualRating)==((int)Math.round(calculatedAverage.getAsDouble()))){
 						Candidate candidateObject= candidateRepository.findById(candidateFeedback.getId()).get();
-						returningCandidateList.add(candidateObject);
+						CandidateResponce candidateResponce = new  CandidateResponce();
+						BeanUtils.copyProperties(candidateObject, candidateResponce);
+						returningCandidateList.add(candidateResponce);
 					}
 				}
 			}

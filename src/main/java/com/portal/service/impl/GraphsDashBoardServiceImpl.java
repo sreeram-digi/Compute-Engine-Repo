@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import com.portal.repository.CandidateFeedbackRepository;
 import com.portal.repository.CandidateRepository;
 import com.portal.repository.InterviewerRepository;
 import com.portal.repository.JobRepository;
+import com.portal.response.CandidateResponce;
 import com.portal.service.GraphsDashBoardService;
 import com.portal.utils.DashBoardFilteringsByRangeOfDates;
 import com.portal.utils.GettingListOfObjectsForGraphs;
@@ -91,7 +93,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	 */
 	
 	@Override
-	public List<Candidate> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
+	public List<CandidateResponce> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
 
 		return gettingListOfObjectsForGraphs.listOfCandidatesForSpecificSelectedWorkFLowStatus(inputStatusCriteria);
 	}
@@ -166,9 +168,9 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	 */
 
 	@Override
-	public List<Candidate> getAllCandidateFeedbackIntoList(String action, String locationCandidateCount) {
+	public List<CandidateResponce> getAllCandidateFeedbackIntoList(String action, String locationCandidateCount) {
 
-		List<Candidate> listHoldingIndividualInformation = new ArrayList<>();
+		List<CandidateResponce> listHoldingIndividualInformation = new ArrayList<>();
 
 		String[] splitIntoSelectSpecificAction = action.split(",");
 		String[] splitIntoLocation = locationCandidateCount.split("&");
@@ -176,8 +178,8 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 		for(int i=0; i<splitIntoLocation.length; i++) {
 
 			for(int j=0; j<splitIntoSelectSpecificAction.length; j++) {
+
 				String selectSpecificAction = null;
-				int count = 0;
 				switch(splitIntoSelectSpecificAction[j]) {
 				case("Applied"):
 					selectSpecificAction = WorkFlowConstants.appliedWorkflowConstants;
@@ -201,7 +203,19 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 						Candidate candidate = candidateRepository.findById(candidateFeedback.getId()).get();
 						Job job = jobRepository.findByLocation(splitIntoLocation[i]);
 						if(job.getId().contains(candidate.getJobId())) { 
-							listHoldingIndividualInformation.add(candidate);
+							CandidateResponce candidateResponce = new  CandidateResponce();
+							BeanUtils.copyProperties(candidate, candidateResponce);
+							listHoldingIndividualInformation.add(candidateResponce);
+						}
+
+						if(filteredActionInputFromUser[k].equalsIgnoreCase("Applied")) {
+							candidateRepository.findAll().stream()
+							.filter(p->p.getJobId().equals(job.getId())).toList()
+							.forEach(candidates->{
+								CandidateResponce candidateResponce = new  CandidateResponce();
+								BeanUtils.copyProperties(candidates, candidateResponce);
+								listHoldingIndividualInformation.add(candidateResponce);
+							});
 						}
 					}
 				}
@@ -274,7 +288,7 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	 */
 
 	@Override
-	public List<Candidate> getAllCandidatesByRatings(String rating) {
+	public List<CandidateResponce> getAllCandidatesByRatings(String rating) {
 		return gettingListOfObjectsForGraphs.getAllCandidatesByRatings(rating);
 	}
 
@@ -364,9 +378,9 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	 */
 
 	@Override
-	public List<Candidate> getListOfCandidatesForJobTitle(String inputJobtitle,String status) throws Exception {
+	public List<CandidateResponce> getListOfCandidatesForJobTitle(String inputJobtitle,String status) throws Exception {
 		
-		List<Candidate> returningCandidateList=new ArrayList<>();
+		List<CandidateResponce> returningCandidateList=new ArrayList<>();
 		
 		List<String> jobTitleList=jobRepository.findAll().stream().map(p->p.getJobTitle()).distinct().toList();
 
@@ -399,13 +413,19 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 							Candidate candidate	=candidateRepository.findById(candidateId).get();
 							if(candidate.getJobTitle().equalsIgnoreCase(inputJobTitleObject)) {
 								tempStatusList.add(candidate);
-								returningCandidateList.add(candidate);
+								CandidateResponce candidateResponce = new  CandidateResponce();
+								BeanUtils.copyProperties(candidate, candidateResponce);
+								returningCandidateList.add(candidateResponce);
 							}
 						}
 						
 						if(sublistOfstatus.equals("Applied")) {
 							tempStatusList=candidateRepository.findAll().stream().filter(p->p.getJobTitle().equalsIgnoreCase(inputJobTitleObject)).toList();
-							returningCandidateList.addAll(tempStatusList);
+							for(Candidate candidate : tempStatusList) {
+								CandidateResponce candidateResponce = new  CandidateResponce();
+								BeanUtils.copyProperties(candidate, candidateResponce);
+								returningCandidateList.add(candidateResponce);
+							}
 						}
 					}
 				}
@@ -543,12 +563,12 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 	 */
 
 	@Override
-	public List<Candidate> getCandidatesListAccordingToStatus(String actions, String skills) {
+	public List<CandidateResponce> getCandidatesListAccordingToStatus(String actions, String skills) {
 
 		String[] actionArray = actions.split(",");
 		String[] skillArray = skills.split("&");
 
-		List<Candidate> listOfCandidates = new ArrayList<>();
+		List<CandidateResponce> listOfCandidates = new ArrayList<>();
 
 		for(String skill : skillArray) {
 
@@ -572,26 +592,31 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 		return listOfCandidates;
 	}
 
-	public List<Candidate> getCandidateList(List<Candidate> candidateList, String[] actions) {
+	public List<CandidateResponce> getCandidateList(List<Candidate> candidateList, String[] actions) {
 
-		List<Candidate> candidatesAction = new ArrayList<>();
+		List<CandidateResponce> candidatesResponceAction = new ArrayList<>();
 
 		for(String action : actions) {
 
 			if(action.equalsIgnoreCase("Applied")) {
-				candidatesAction.addAll(candidateList);
-				break;
+				for(Candidate candidate : candidateList) {
+					CandidateResponce candidateResponce = new  CandidateResponce();
+					BeanUtils.copyProperties(candidate, candidateResponce);
+					candidatesResponceAction.add(candidateResponce);
+				}
 			}
-			
-			candidatesAction.addAll(candidateList.stream()
-					.filter(candidate->candidate.getCandidateFeedback().getStatus().equalsIgnoreCase(action))
-					.toList());
+
+			candidateList.stream()
+			.filter(candidate->candidate.getCandidateFeedback().getStatus().equalsIgnoreCase(action))
+			.forEach(candidates->{
+				CandidateResponce candidateResponce = new  CandidateResponce();
+				BeanUtils.copyProperties(candidates, candidateResponce);
+				candidatesResponceAction.add(candidateResponce);
+			});
 		}
-		return candidatesAction;
+		return candidatesResponceAction;
 	}
 
-
-	
 	
 }
 

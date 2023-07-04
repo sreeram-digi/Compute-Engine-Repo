@@ -49,6 +49,9 @@ public class DashBoardFilteringsByRangeOfDates {
 		long date = 0;
 
 		switch(dateFromDropDown) {
+		case("Daily"):
+			date = 0;
+		break;
 		case("Weekly"):
 			date = 1;
 			break;
