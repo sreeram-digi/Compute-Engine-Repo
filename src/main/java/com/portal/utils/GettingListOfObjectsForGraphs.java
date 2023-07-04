@@ -19,6 +19,7 @@ import com.portal.repository.CandidateRepository;
 import com.portal.repository.InterviewerRepository;
 import com.portal.response.CandidateResponce;
 
+
 @Component
 public class GettingListOfObjectsForGraphs {
 	
@@ -38,16 +39,14 @@ public class GettingListOfObjectsForGraphs {
 	 * {@summary : When Admin's clicks on a specific bar , he can view all the data of that specific bar}
 	 */
 	public List<CandidateResponce> listOfCandidatesForSpecificSelectedWorkFLowStatus(String inputStatusCriteria) {
-
+    
 		List<CandidateResponce> filteredCandidateDateFromInputStatuesCriteria = new ArrayList<>();
-
-		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria = new ArrayList<>();
-		
+		List<CandidateFeedback> gettingCandidateIDusingCandidateStatusCriteria= new ArrayList<>();
+    
 		for(String statusOfCandidate:inputStatusCriteria.split(",")) {
-
 			gettingCandidateIDusingCandidateStatusCriteria.addAll(candidateFeedbackRepository.findBystatus(statusOfCandidate));
-        }
-
+		}
+    
 		List<String> filteringCanidateID = gettingCandidateIDusingCandidateStatusCriteria.stream().map(CandidateFeedback::getId).toList();
 		
 		for(int i=0; i<filteringCanidateID.size(); i++) {
@@ -56,7 +55,8 @@ public class GettingListOfObjectsForGraphs {
 			BeanUtils.copyProperties(candidateObject, candidateResponce);
 			filteredCandidateDateFromInputStatuesCriteria.add(candidateResponce);
 		}
-
+		
+		System.out.println(filteredCandidateDateFromInputStatuesCriteria);
 		return filteredCandidateDateFromInputStatuesCriteria;
 	}
 	

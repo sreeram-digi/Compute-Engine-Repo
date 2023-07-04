@@ -67,7 +67,7 @@ public class JobDashboardGraphsFilteringByRange {
 
 		Map<Map<String,Map<String,Integer>>,List<?>> addXYAxisMapAndHoveringListObjectJobLocation =new HashMap<>();
 		addXYAxisMapAndHoveringListObjectJobLocation.put(getAllJobLocationFromDateRange(date),
-				getAllCandidateFeedbackIntoList(WorkFlowConstants.appliedSelectedRejectedValues) );
+				getAllCandidateFeedbackIntoList(WorkFlowConstants.appliedSelectedRejectedValues));
 
 		/* Job Title */
 
