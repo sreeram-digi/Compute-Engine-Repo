@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -60,7 +61,7 @@ public class Job {
     @NotNull
     private String workType;
     
-    @NotNull
+    @CreatedDate
     private LocalDateTime jobPostingDate;
 
     @NotNull
