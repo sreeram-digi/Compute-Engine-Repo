@@ -1,5 +1,6 @@
 package com.portal.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -226,6 +227,23 @@ public class CandidateController {
 		return candidateService.updateCandidateResume(file, id,jobId);
 	}
 	
+
+	@Operation(summary = "This method is used to get candidateList with jobId")
+	@GetMapping(value = "/candidateListWithJobId/{jobId}")
+	public List<Candidate> getCandidatesWithJobId(@PathVariable("jobId") String jobId) throws Exception{
+		return candidateService.getAllCandidateByJobId(jobId);
+	}
+	
+	@Operation(summary = "To move Particular candidate resume from original path to reserved path ")
+	@GetMapping(value = "/moveCandidateResume/{candidateId}")
+	public File moveCandidateResume(@PathVariable(value = "candidateId") String candidateId) throws IOException {
+		return candidateService.moveCandidateResume(candidateId);
+	}
+	
+	
+	
+	
+	
 	/**
 	 * The Method will create Excel report for the list of candidates
 	 * This will have fields ID,firstName,lastName,phoneNumber,email,
@@ -257,11 +275,5 @@ public class CandidateController {
 
 		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName).contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
 	}  
-
-	@Operation(summary = "This method is used to get candidateList with jobId")
-	@GetMapping(value = "/candidateListWithJobId/{jobId}")
-	public List<Candidate> getCandidatesWithJobId(@PathVariable("jobId") String jobId) throws Exception{
-		return candidateService.getAllCandidateByJobId(jobId);
-	}
 	
 }

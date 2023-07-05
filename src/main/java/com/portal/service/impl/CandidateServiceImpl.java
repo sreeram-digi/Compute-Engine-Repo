@@ -1,12 +1,13 @@
 package com.portal.service.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +37,6 @@ import com.portal.ApplicationConstants;
 import com.portal.action.ActionConstants;
 import com.portal.bean.Candidate;
 import com.portal.bean.CandidateFeedback;
-import com.portal.bean.CandidateHistory;
 import com.portal.bean.Interviewer;
 import com.portal.bean.Job;
 import com.portal.bean.MembersForMeeting;
@@ -79,6 +79,9 @@ public class CandidateServiceImpl implements CandidateService {
 
 	@Value("${resume.paths}")
 	private String path;
+	
+	@Value("${reserved.path}")
+	private String reservedPath;
 
 	@Autowired
 	private ApplicationConfigurations applicationConfigurations;
@@ -287,7 +290,6 @@ public class CandidateServiceImpl implements CandidateService {
 	public List<Candidate> getAllCandidateByJobId(String joId) throws Exception {
 
 		List<Candidate> candidateList = candidateRepository.findByJobId(joId) ;
-
 		if(candidateList!=null) {
 			return candidateList;
 		}
@@ -308,8 +310,6 @@ public class CandidateServiceImpl implements CandidateService {
 		Job adminJobDescription = jobRepository.findById(jobId).orElseThrow(()-> new Exception("Job id not found"));
 
 		List<String> arrayList = Arrays.asList(adminJobDescription.getSkillSet().split(","));
-		String candidateSkillSet = candidate.getSkills();
-
 		String[] fileFrags = file.getOriginalFilename().split("\\.");
 		String resumeName = id + "." + fileFrags[fileFrags.length - 1];
 
@@ -322,7 +322,6 @@ public class CandidateServiceImpl implements CandidateService {
 
 				if (destinationFolderPath != null) {
 					File destinationFolder = new File(destinationFolderPath);
-					System.out.println(destinationFolder.getAbsolutePath() +"   "+destinationFolder.getPath());
 					if (destinationFolder.exists() && destinationFolder.isDirectory()) {
 
 						CandidateFeedback candidateFeedback = candidateFeedbackRepository.findById(id).orElse(new CandidateFeedback());
@@ -366,6 +365,36 @@ public class CandidateServiceImpl implements CandidateService {
 		return destinationFolderPath;
 	}
 
+	
+	/**
+	 * @author Revathi Muddani
+	 * {@summary : Moving Particular candidate resume from original path to reserved path }
+	 * @throws IOException 
+	 * @exception Exception
+	 */
+	
+	@Override
+	public File moveCandidateResume(String candidateId) throws IOException {
 
+		Job job = jobRepository.findById(candidateRepository.findById(candidateId).get().getJobId()).get();
+		String[] skillSet = job.getSkillSet().split(",");
+		List<String> folderNames=	Arrays.asList(new File(path).listFiles()).stream().map(File::getName).filter(name->name.equals(skillSet[0])).toList();
+		List<File> tempFiles =  Arrays.asList(new File(path+"/"+folderNames.get(0)).listFiles());
+		for(File file : tempFiles) {
+
+			if(file.getName().contains(candidateId)) {
+
+				File sourceFile = new File(getDestinationFolderPath(skillSet[0]), file.getName());
+				File destinationFile = new File(reservedPath, file.getName());
+				Path sourcePath = sourceFile.toPath();
+				Path destinationPath = destinationFile.toPath();
+				Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+				log.info("PDF file copied successfully.");
+			}
+		}
+		return null;
+	}
+
+	
 	
 }
