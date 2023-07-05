@@ -1,5 +1,6 @@
 package com.portal.service.impl;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -615,6 +616,105 @@ public class GraphsDashBoardServiceImpl implements GraphsDashBoardService{
 			});
 		}
 		return candidatesResponceAction;
+	}
+
+	@Override
+	public Map<String,Map<String,Map<String, Integer>>> graphWithJobTitle(String dropDownDate) throws Exception {
+		
+		long date = 0;
+
+		switch(dropDownDate) {
+		case("Daily"):
+			date = 0;
+		break;
+		case("Weekly"):
+			date = 1;
+			break;
+		case("Monthly"):
+			date = 4;
+			break;
+		case("Quarterly"):
+			date = 13;
+			break;
+		case("Half-Yearly"):
+			date = 26;
+			break;
+		case("Yearly"):
+			date = 52;
+			break;
+		default:
+			date = 52;
+		}
+		
+		
+		
+		List<String> jobTitleList=jobRepository.findAll().stream().map(p->p.getJobTitle()).distinct().toList();
+
+		Map<String,Map<String,Map<String,Integer>>> returningMap=new HashMap<>();
+		Map<String,Map<String,Integer>> statusOfcandidateMap=new HashMap<>();
+
+		LocalDate startingDate =LocalDate.now().minusWeeks(date);
+		LocalDate endDate = LocalDate.now();	
+
+		for(String inputJobTitleObject:jobTitleList) {
+			Map<String,Integer> xAndYasisValues=new HashMap<>();
+			if(jobTitleList.contains(inputJobTitleObject)){
+
+				List<String> statusList=Arrays.asList(WorkFlowConstants.appliedSelectedRejectedValues.split(","));
+
+				for(String singleStatusObject:statusList) {
+					List<String> multipleStatusList=new ArrayList<>();
+					List<Candidate> tempStatusList= new ArrayList<>();
+					switch(singleStatusObject) {
+
+					case "Applied":
+						multipleStatusList.add(WorkFlowConstants.appliedWorkflowConstants);
+						break;
+
+					case "Selected":
+						multipleStatusList.addAll(Arrays.asList(WorkFlowConstants.selectedWorkflowConstants.split(",")));
+						break;
+
+					case "Rejected":
+						multipleStatusList.addAll(Arrays.asList(WorkFlowConstants.rejectedWorkflowConstants.split(",")));
+						break;	
+					}
+
+					for(String sublistOfstatus:multipleStatusList) {
+						List<CandidateFeedback> candidateFeedback=candidateFeedbackRepository.findBystatus(sublistOfstatus);
+						List<String> candidateIds =candidateFeedback.stream().map(CandidateFeedback::getId).toList();
+						for(String candidateId:candidateIds) {
+							Candidate candidate	=candidateRepository.findById(candidateId).get();
+							if(candidate.getLastModifiedDate().toLocalDate().isAfter(startingDate)
+									&& candidate.getLastModifiedDate().toLocalDate().isBefore(endDate)) {
+								if(candidate.getJobTitle().equalsIgnoreCase(inputJobTitleObject)) {
+									tempStatusList.add(candidate);
+								}
+							}
+
+							if(candidate.getUploadedDate().toLocalDate().isAfter(startingDate) && 
+									candidate.getUploadedDate().toLocalDate().isBefore(endDate)) {
+								if(sublistOfstatus.equals("Applied")) {
+									tempStatusList=candidateRepository.findAll().stream().filter(p->p.getJobTitle().equalsIgnoreCase(inputJobTitleObject)).toList();
+
+								}
+							}
+						}
+						xAndYasisValues.put(singleStatusObject, tempStatusList.size());
+					}
+				}
+				statusOfcandidateMap.put(inputJobTitleObject, xAndYasisValues);
+			}
+			else {
+				throw new Exception("Job Title not found");
+			}
+		}
+		
+		returningMap.put("joblocation", statusOfcandidateMap);
+		return returningMap;
+
+	
+		
 	}
 
 	

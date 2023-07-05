@@ -45,5 +45,7 @@ public interface GraphsDashBoardService {
 	
 	List<Interviewer> getListOfData(String position);
 	
+	
+	Map<String,Map<String,Map<String,Integer>>> graphWithJobTitle(String dropDownDate)throws Exception;
 }
 

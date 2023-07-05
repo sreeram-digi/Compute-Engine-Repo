@@ -3,14 +3,17 @@ package com.portal.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.azure.core.annotation.Get;
 import com.portal.bean.Candidate;
 import com.portal.bean.Interviewer;
 import com.portal.response.CandidateResponce;
 import com.portal.service.GraphsDashBoardService;
+import com.portal.utils.JobSkillSetLocationTitleGraphs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,9 @@ public class GraphsDashBoardController {
 
 	GraphsDashBoardService graphsDashBoardService;
 
+	@Autowired
+	JobSkillSetLocationTitleGraphs graphs;
+ 	
 	public GraphsDashBoardController(GraphsDashBoardService graphsDashBoardService) {
 		super();
 		this.graphsDashBoardService = graphsDashBoardService;
@@ -138,5 +144,19 @@ public class GraphsDashBoardController {
 		return graphsDashBoardService.getListOfData(position);
 	}
 	
-
+	@GetMapping("/dateFilterForJobGraphs/{dropDownDate}")
+	public Map<String,Map<String,Map<String,Integer>>> graphWithJobTitle(@PathVariable("dropDownDate") String dropDownDate)throws Exception{
+		return graphs.getAllInformationForJobLocationAndJobSkillSetAndJobTitleFromCandidateAndCandidateFeedback(dropDownDate);
+	}
+	
+	
+	@GetMapping("/dateFilterForWorkflowRatingsAndHr/{dropDownDate}")
+	public Map<String,Map<String,Integer>> getCandidateRatingWorkflowSelectorsHrsCount(@PathVariable("dropDownDate")String dateFromDropDown){
+		return graphs.getCandidateRatingWorkflowSelectorsHrsCount(dateFromDropDown);
+	}
+	
+//	@GetMapping("/dateFilterForJobToGetList/")
+//	public  Map<String,Map<String,List<CandidateResponce>>> getListOfCandidatesForJobTitle() throws Exception {
+//		return graphs.getListOfCandidatesForJobTitle();
+//	}
 }
