@@ -1,5 +1,6 @@
 package com.portal.controller;
 
+import java.io.File;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.portal.bean.Interviewer;
 import com.portal.bean.Job;
 import com.portal.exception.UserNotFoundException;
 import com.portal.service.JobService;
@@ -58,10 +58,18 @@ public class JobController {
 		log.debug("updatJob():updating the job fields:" + job);
 		return this.jobService.updateJob(job);
 	}
+	
 	@Operation(summary = " This method is used to get all jobs")
 	@DeleteMapping("/job/{id}")
 	public void deleteJob(@PathVariable(value = "id") String id) {
 		log.debug("deleteJob():deleteing the job by id " + id);
 		jobService.deleteJobId(id);
 	}
+	
+	@Operation(summary = "This method is used to get all resumes by JobId")
+	@GetMapping("/getallresumesbyJobId/{jobId}")
+	public List<File> getallresumesbyJobId(@PathVariable(value = "jobId") String jobId) {
+		return jobService.getallresumesbyJobId(jobId);
+	}
+	
 }

@@ -1,8 +1,7 @@
 package com.portal.service;
 
+import java.io.File;
 import java.util.List;
-
-import javax.validation.Valid;
 
 import com.portal.bean.Job;
 import com.portal.exception.UserNotFoundException;
@@ -18,4 +17,6 @@ public interface JobService {
 	Job updateJob(Job job) throws UserNotFoundException;
 
 	void deleteJobId(String id);
+
+	List<File> getallresumesbyJobId(String jobId);
 }

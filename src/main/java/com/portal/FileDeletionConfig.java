@@ -1,9 +1,10 @@
 package com.portal;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,20 +32,15 @@ public class FileDeletionConfig {
 	 * fixedRate method executes task for mentioned milliseconds.
 	 * 
 	 */
-	@Scheduled(fixedDelay= 60000)
+	@Scheduled(cron = "0 0 0 * * ?") // Executes at 12:00 AM (midnight) every day
 	public  void running() {
 
 		log.info("task in its "+ count+ "iteration");
 
-		String savingFileName="cb569050-6a56-41c8-b288-d70951730105.xlsx";
-		File folder = new File(folderPath);
+		List<File> foldersList = Arrays.asList(new File(folderPath).listFiles());
+		deleteFolder(foldersList);
 
-		if (folder.exists()) {
-			deleteFolder(folder,savingFileName);
-			log.info("Folder deleted");
-		} else {
-			log.error("Folder doesnot exists");
-		}
+		log.info("Folder deleted");
 		count++;
 	} 
 
@@ -55,48 +51,26 @@ public class FileDeletionConfig {
 	 * @param savingFileName
 	 */
 
-	private  void deleteFolder(File folder,String savingFileName) {
+	private  void deleteFolder(List<File> foldersList) {
 
-		String folderPath = reservedPath+savingFileName;
-		File[] files = folder.listFiles();
+		for(File file : foldersList) {
 
-		if (files != null) {
+			if(file.isDirectory()) {
 
-			for (File fileObject : files) {
-				Path path= Path.of(fileObject.toString());
+				for (File fileObject : file.listFiles()) {
 
-				if (fileObject.isDirectory()) {	
-
-					deleteFolder(fileObject,savingFileName);
-				}
-
-				else {
-					LocalDate fileCreationDate=	new Date(fileObject.lastModified()).toLocalDate();
-
+					LocalDate fileCreationDate = new Date(fileObject.lastModified()).toLocalDate();
 					LocalDate fileDeletionDate = fileCreationDate.plusYears(1);
-
-					if(fileObject.getName().equals(savingFileName)) {
-
-						log.info("File name matched moving to reserved folder"+folderPath);
-
-						fileObject.renameTo(new File((folderPath)));
-
-						if(fileDeletionDate.equals(LocalDate.now())) {
-
-							fileObject.delete();
-
-							log.info("Folder deleted");
-						}
-						else {
-							log.error("Deletion date not arraived");
-						}
-					}
-				}	
-			} 
-
+					if(fileDeletionDate.equals(LocalDate.now())) {
+						fileObject.delete();
+						log.info("Folder deleted");
+					}	
+				}
+			}else {
+				log.info(file +"  is not a directory");
+			}
 		}
-
-
 	}
+
 
 }

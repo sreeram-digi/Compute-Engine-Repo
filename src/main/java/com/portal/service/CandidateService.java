@@ -1,5 +1,7 @@
 package com.portal.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -49,5 +51,7 @@ public interface CandidateService {
 	List<Candidate> getAllCandidateByJobId(String joId) throws Exception;
 	
 	String updateCandidateResume(MultipartFile file, String id, String jobId) throws Exception;
+
+	File moveCandidateResume(String candidateId) throws IOException;
 		
 }
